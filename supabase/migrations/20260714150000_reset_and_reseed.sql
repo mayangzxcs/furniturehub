@@ -5,20 +5,13 @@
 -- IMPORTANT: Run this in the Supabase SQL Editor or via supabase db push.
 -- This will DELETE ALL EXISTING DATA.
 
--- ============ STEP 1: DROP TRIGGERS AND FUNCTIONS FIRST ============
--- (Must drop triggers before tables, since DROP TRIGGER fails if table is gone)
-
--- Drop trigger on auth.users (this table is NOT being dropped)
+-- ============ STEP 1: DROP TRIGGERS ON auth.users (not being dropped) ============
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 
--- Drop functions
+-- ============ STEP 2: DROP FUNCTIONS USED ONLY BY auth.users TRIGGER ============
 DROP FUNCTION IF EXISTS handle_new_user();
-DROP FUNCTION IF EXISTS update_updated_at();
-DROP FUNCTION IF EXISTS get_post_stats(uuid);
-DROP FUNCTION IF EXISTS increment_view(uuid);
 
--- ============ STEP 2: DROP ALL TABLES (in reverse dependency order) ============
--- CASCADE will automatically drop triggers on these tables
+-- ============ STEP 3: DROP ALL TABLES (CASCADE drops their triggers) ============
 DROP TABLE IF EXISTS contact_messages CASCADE;
 DROP TABLE IF EXISTS activity_logs CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
@@ -33,7 +26,12 @@ DROP TABLE IF EXISTS posts CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
 
--- ============ STEP 3: RECREATE SCHEMA ============
+-- ============ STEP 4: DROP REMAINING FUNCTIONS (tables now gone) ============
+DROP FUNCTION IF EXISTS update_updated_at();
+DROP FUNCTION IF EXISTS get_post_stats(uuid);
+DROP FUNCTION IF EXISTS increment_view(uuid);
+
+-- ============ STEP 5: RECREATE SCHEMA ============
 
 -- ============ PROFILES ============
 CREATE TABLE IF NOT EXISTS profiles (
@@ -530,7 +528,7 @@ BEGIN
 END;
 $$;
 
--- ============ STEP 4: SEED DATA ============
+-- ============ STEP 6: SEED DATA ============
 
 -- Seed categories
 INSERT INTO categories (id, name, slug, description, icon) VALUES
