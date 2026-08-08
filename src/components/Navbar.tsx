@@ -27,6 +27,13 @@ export default function Navbar() {
     if (!profile) return
     loadNotifications()
     loadUnreadMessages()
+
+    // Poll for unread message count so it updates after messages are read
+    const interval = setInterval(() => {
+      loadUnreadMessages()
+    }, 5000)
+
+    return () => clearInterval(interval)
   }, [profile])
 
   async function loadUnreadMessages() {

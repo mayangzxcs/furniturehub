@@ -29,6 +29,9 @@ export default function SignUp() {
       showToast(error, 'error')
     } else if (requiresVerification) {
       setVerificationSent(true)
+    } else {
+      showToast('Account created successfully!', 'success')
+      setVerificationSent(true)
     }
   }
 
