@@ -65,13 +65,24 @@ export default function AdminDashboard() {
       .from('posts')
       .select(`*, category:categories(*), user:profiles(*), post_images(*)`)
       .order('created_at', { ascending: false })
-    setPosts((data as PostWithRelations[]) || [])
-
     const postsData = (data as PostWithRelations[]) || []
+    setPosts(postsData)
+
+    // Fetch all likes in a single query instead of N+1
     if (postsData.length) {
-      const likesPromises = postsData.map(p => supabase.from('likes').select('id', { count: 'exact', head: true }).eq('post_id', p.id))
-      const likesResults = await Promise.all(likesPromises)
-      const sorted = postsData.map((p, i) => ({ ...p, likes_count: likesResults[i].count || 0 }))
+      const postIds = postsData.map(p => p.id)
+      const { data: likesData } = await supabase
+        .from('likes')
+        .select('post_id')
+        .in('post_id', postIds)
+
+      const likesMap = new Map<string, number>()
+      for (const l of (likesData as { post_id: string }[] || [])) {
+        likesMap.set(l.post_id, (likesMap.get(l.post_id) || 0) + 1)
+      }
+
+      const sorted = postsData
+        .map(p => ({ ...p, likes_count: likesMap.get(p.id) || 0 }))
         .sort((a, b) => (b.likes_count || 0) - (a.likes_count || 0))
         .slice(0, 5)
       setTopPosts(sorted)
@@ -372,7 +383,9 @@ function PostModal({ onClose, onSaved, categories, userId }: { onClose: () => vo
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i]
-      const { data: uploadResult, error } = await supabase.storage.from('furniture').upload('placeholder', file)
+      const ext = file.name.split('.').pop() || 'jpg'
+      const uniquePath = `posts/${post.id}/${Date.now()}-${i}.${ext}`
+      const { data: uploadResult, error } = await supabase.storage.from('furniture').upload(uniquePath, file)
       if (error) { console.error(error); continue }
       const actualPath = uploadResult?.path || ''
       const { data: { publicUrl } } = supabase.storage.from('furniture').getPublicUrl(actualPath)

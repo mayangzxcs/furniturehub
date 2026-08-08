@@ -19,6 +19,7 @@ export default function Search() {
     const timer = setTimeout(async () => {
       const q = query.trim()
       if (searchType !== 'users') {
+        // Search by caption (ilike) OR by tags (array contains)
         const { data } = await supabase
           .from('posts')
           .select(`*, category:categories(*), user:profiles(*), post_images(*)`)

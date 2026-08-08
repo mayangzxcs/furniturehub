@@ -21,12 +21,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   async function loadProfile(uid: string) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', uid)
-      .maybeSingle()
-    setProfile(data as Profile | null)
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', uid)
+        .maybeSingle()
+      if (error) {
+        console.error('Failed to load profile:', error)
+        setProfile(null)
+        return
+      }
+      setProfile(data as Profile | null)
+    } catch (err) {
+      console.error('Unexpected error loading profile:', err)
+      setProfile(null)
+    }
   }
 
   useEffect(() => {

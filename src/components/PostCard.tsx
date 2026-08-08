@@ -99,27 +99,17 @@ export default function PostCard({ post, onLightbox, onFavoriteChange }: Props) 
             </div>
           )}
         </Link>
-        <div className = "row">
+        <div className="row">
           <div className="flex-grow-1 col-4">
             <Link to={profileUrl} className="post-card-author text-decoration-none">{post.user?.display_name || 'Unknown'}</Link>
             <div className="post-card-date">{formatDate(post.created_at)}</div>
           </div>
-          {!!post.is_pinned && post.is_featured && (
+          {(post.is_pinned || post.is_featured) && (
             <div className="flex-grow-1 col-2">
               {post.is_featured && (
-                <span style={{ marginLeft: post.is_pinned ? '' : '20px' }} className="badge bg-fh-accent text-white "><i className="bi bi-star-fill me-1"></i>Featured</span>
+                <span className="badge bg-fh-accent text-white"><i className="bi bi-star-fill me-1"></i>Featured</span>
               )}
-              {!!post.is_pinned && (
-                <span className="badge bg-fh-primary text-white"><i className="bi bi-pin-fill me-1"></i>Pinned</span>
-              )}
-            </div>
-          )}
-           {!!post.is_pinned || post.is_featured && (
-            <div className="flex-grow-1 col-2">
-              {post.is_featured && (
-                <span style={{ marginLeft: post.is_pinned ? '' : '20px' }} className="badge bg-fh-accent text-white "><i className="bi bi-star-fill me-1"></i>Featured</span>
-              )}
-              {!!post.is_pinned && (
+              {post.is_pinned && (
                 <span className="badge bg-fh-primary text-white"><i className="bi bi-pin-fill me-1"></i>Pinned</span>
               )}
             </div>

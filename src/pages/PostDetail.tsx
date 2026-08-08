@@ -68,10 +68,20 @@ export default function PostDetail() {
       .order('created_at', { ascending: true })
 
     const allComments = (data as Comment[]) || []
-    const topLevel = allComments.filter(c => !c.parent_id)
-    const buildTree = (parentId: string): Comment[] =>
-      allComments.filter(c => c.parent_id === parentId).map(c => ({ ...c, replies: buildTree(c.id) }))
-    setComments(topLevel.map(c => ({ ...c, replies: buildTree(c.id) })))
+    // Build comment tree in O(n) using a map
+    const commentMap = new Map<string, Comment>()
+    for (const c of allComments) {
+      commentMap.set(c.id, { ...c, replies: [] })
+    }
+    const roots: Comment[] = []
+    for (const c of commentMap.values()) {
+      if (c.parent_id && commentMap.has(c.parent_id)) {
+        commentMap.get(c.parent_id)!.replies!.push(c)
+      } else {
+        roots.push(c)
+      }
+    }
+    setComments(roots)
   }, [id])
 
   useEffect(() => { loadPost(); loadComments() }, [loadPost, loadComments])
