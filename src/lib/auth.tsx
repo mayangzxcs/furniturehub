@@ -8,7 +8,7 @@ interface AuthContextValue {
   profile: Profile | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: string | null }>
-  signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null; requiresVerification: boolean }>
+  signUp: (email: string, password: string, displayName: string) => Promise<{ error: string | null; requiresVerification: boolean; rateLimited: boolean }>
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
@@ -68,15 +68,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null }
   }
 
-  async function signUp(email: string, password: string, displayName: string): Promise<{ error: string | null; requiresVerification: boolean }> {
+  async function signUp(email: string, password: string, displayName: string): Promise<{ error: string | null; requiresVerification: boolean; rateLimited: boolean }> {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { display_name: displayName } },
     })
-    if (error) return { error: error.message, requiresVerification: false }
+    if (error) {
+      // If the only issue is email rate limiting, the user was still created in the DB
+      // (the handle_new_user trigger fires on auth.users insert). Treat as success.
+      if ((error as any)?.code === 'over_email_send_rate_limit' || error.message?.includes('rate limit')) {
+        return { error: null, requiresVerification: false, rateLimited: true }
+      }
+      return { error: error.message, requiresVerification: false, rateLimited: false }
+    }
     // data.requires_verification will be true — user must verify email first
-    return { error: null, requiresVerification: (data as any)?.requires_verification ?? false }
+    return { error: null, requiresVerification: (data as any)?.requires_verification ?? false, rateLimited: false }
   }
 
   async function signOut() {

@@ -23,14 +23,18 @@ export default function SignUp() {
       return
     }
     setLoading(true)
-    const { error, requiresVerification } = await signUp(email, password, displayName)
+    const { error, requiresVerification, rateLimited } = await signUp(email, password, displayName)
     setLoading(false)
     if (error) {
       showToast(error, 'error')
     } else if (requiresVerification) {
       setVerificationSent(true)
     } else {
-      showToast('Account created successfully!', 'success')
+      if (rateLimited) {
+        showToast('Account created! (Confirmation email rate-limited — please try again later)', 'info')
+      } else {
+        showToast('Account created successfully!', 'success')
+      }
       setVerificationSent(true)
     }
   }
