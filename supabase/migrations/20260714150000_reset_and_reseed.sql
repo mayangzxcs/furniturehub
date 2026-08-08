@@ -5,7 +5,20 @@
 -- IMPORTANT: Run this in the Supabase SQL Editor or via supabase db push.
 -- This will DELETE ALL EXISTING DATA.
 
--- ============ STEP 1: DROP ALL TABLES (in reverse dependency order) ============
+-- ============ STEP 1: DROP TRIGGERS AND FUNCTIONS FIRST ============
+-- (Must drop triggers before tables, since DROP TRIGGER fails if table is gone)
+
+-- Drop trigger on auth.users (this table is NOT being dropped)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+-- Drop functions
+DROP FUNCTION IF EXISTS handle_new_user();
+DROP FUNCTION IF EXISTS update_updated_at();
+DROP FUNCTION IF EXISTS get_post_stats(uuid);
+DROP FUNCTION IF EXISTS increment_view(uuid);
+
+-- ============ STEP 2: DROP ALL TABLES (in reverse dependency order) ============
+-- CASCADE will automatically drop triggers on these tables
 DROP TABLE IF EXISTS contact_messages CASCADE;
 DROP TABLE IF EXISTS activity_logs CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
@@ -20,22 +33,7 @@ DROP TABLE IF EXISTS posts CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS profiles CASCADE;
 
--- Drop the trigger function for new users
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-DROP FUNCTION IF EXISTS handle_new_user();
-
--- Drop the updated_at trigger function
-DROP TRIGGER IF EXISTS profiles_updated_at ON profiles;
-DROP TRIGGER IF EXISTS posts_updated_at ON posts;
-DROP TRIGGER IF EXISTS conversations_updated_at ON conversations;
-DROP TRIGGER IF EXISTS comments_updated_at ON comments;
-DROP FUNCTION IF EXISTS update_updated_at();
-
--- Drop the post stats function
-DROP FUNCTION IF EXISTS get_post_stats(uuid);
-DROP FUNCTION IF EXISTS increment_view(uuid);
-
--- ============ STEP 2: RECREATE SCHEMA ============
+-- ============ STEP 3: RECREATE SCHEMA ============
 
 -- ============ PROFILES ============
 CREATE TABLE IF NOT EXISTS profiles (
@@ -532,7 +530,7 @@ BEGIN
 END;
 $$;
 
--- ============ STEP 3: SEED DATA ============
+-- ============ STEP 4: SEED DATA ============
 
 -- Seed categories
 INSERT INTO categories (id, name, slug, description, icon) VALUES
