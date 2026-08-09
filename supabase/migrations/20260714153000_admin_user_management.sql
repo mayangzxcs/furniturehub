@@ -24,7 +24,8 @@ BEGIN
   UPDATE profiles SET status = p_status WHERE id = p_user_id;
 
   -- Ban/unban the user in auth.users
-  IF p_status = 'disabled' THEN
+  -- 'pending' and 'disabled' users cannot log in; 'active' users can
+  IF p_status IN ('pending', 'disabled') THEN
     UPDATE auth.users SET banned_until = now() + interval '100 years' WHERE id = p_user_id;
   ELSE
     UPDATE auth.users SET banned_until = NULL WHERE id = p_user_id;
