@@ -35,8 +35,10 @@ export default function SignUp() {
       // No email verification required - account created successfully
       // Sign out immediately to prevent auto-login (user must be approved first)
       await signOut()
-      // Show the "Account Created" screen instead of redirecting to signin
-      setVerificationSent(true)
+      // Wait a bit for the auth state to update, then show the "Account Created" screen
+      setTimeout(() => {
+        setVerificationSent(true)
+      }, 100)
     }
   }
 
