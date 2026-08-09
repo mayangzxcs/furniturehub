@@ -1,11 +1,10 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
-import { supabase } from '../lib/supabase'
 
 export default function SignUp() {
-  const { signUp, signOut } = useAuth()
+  const { signUp, signOut, session } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -13,6 +12,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const [verificationSent, setVerificationSent] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const logoutCalled = useRef(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -35,10 +35,11 @@ export default function SignUp() {
       // No email verification required - account created successfully
       // Sign out immediately to prevent auto-login (user must be approved first)
       await signOut()
-      // Wait a bit for the auth state to update, then show the "Account Created" screen
+      // Show the "Account Created" screen after a short delay
+      // The navbar will update automatically via the auth state change listener
       setTimeout(() => {
         setVerificationSent(true)
-      }, 100)
+      }, 500)
     }
   }
 
