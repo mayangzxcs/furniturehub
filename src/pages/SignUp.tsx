@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
 
 export default function SignUp() {
   const { signUp } = useAuth()
+  const navigate = useNavigate()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,6 +30,10 @@ export default function SignUp() {
       showToast(error, 'error')
     } else if (requiresVerification) {
       setVerificationSent(true)
+    } else {
+      // No email verification required - account created successfully
+      showToast('Account created! You can now sign in.', 'success')
+      navigate('/signin')
     }
   }
 

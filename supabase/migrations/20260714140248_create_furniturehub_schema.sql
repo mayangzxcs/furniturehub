@@ -27,6 +27,15 @@ DROP POLICY IF EXISTS "profiles_update_own" ON profiles;
 CREATE POLICY "profiles_update_own" ON profiles FOR UPDATE
   TO authenticated USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 
+-- Admin can update any profile (e.g., enable/disable users)
+DROP POLICY IF EXISTS "profiles_update_admin" ON profiles;
+CREATE POLICY "profiles_update_admin" ON profiles FOR UPDATE
+  TO authenticated USING (
+    EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+  ) WITH CHECK (
+    EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+  );
+
 -- ============ CATEGORIES ============
 CREATE TABLE IF NOT EXISTS categories (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -391,6 +400,27 @@ CREATE POLICY "activity_logs_select_admin" ON activity_logs FOR SELECT
 DROP POLICY IF EXISTS "activity_logs_insert_authenticated" ON activity_logs;
 CREATE POLICY "activity_logs_insert_authenticated" ON activity_logs FOR INSERT
   TO authenticated WITH CHECK (true);
+
+-- ============ CONTACT_MESSAGES ============
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  email text NOT NULL,
+  message text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "contact_messages_insert_all" ON contact_messages;
+CREATE POLICY "contact_messages_insert_all" ON contact_messages FOR INSERT
+  TO anon, authenticated WITH CHECK (true);
+
+DROP POLICY IF EXISTS "contact_messages_select_admin" ON contact_messages;
+CREATE POLICY "contact_messages_select_admin" ON contact_messages FOR SELECT
+  TO authenticated USING (
+    EXISTS (SELECT 1 FROM profiles WHERE profiles.id = auth.uid() AND profiles.role = 'admin')
+  );
 
 -- ============ UPDATED_AT TRIGGER ============
 CREATE OR REPLACE FUNCTION update_updated_at()

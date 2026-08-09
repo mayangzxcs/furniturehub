@@ -58,6 +58,9 @@ This creates:
 - **Viewer**: `viewer@homeofcomfort.com` / `viewer123`
 - 6 categories, 6 posts with images, comments, likes, favorites, chat messages, notifications
 
+> **Note:** For the seed script, you need to set `SUPABASE_SERVICE_ROLE_KEY` in your `.env` file (found in Supabase Dashboard → Settings → API).
+> If you get **429 Too Many Requests** when signing up, adjust the rate limits in Supabase Dashboard → Authentication → Rate Limits.
+
 ### 4. Run Locally
 
 ```bash
