@@ -9,6 +9,7 @@ export default function SignIn() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -35,7 +36,26 @@ export default function SignIn() {
           </div>
           <div className="mb-3">
             <label className="fh-form-label">Password</label>
-            <input type="password" className="fh-form-control" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••" />
+            <div style={{ position: 'relative' }}>
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                className="fh-form-control" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+                required 
+                placeholder="••••••••" 
+                style={{ paddingRight: '3rem' }}
+              />
+              <button 
+                type="button" 
+                className="btn btn-sm border-0 bg-transparent" 
+                onClick={() => setShowPassword(!showPassword)}
+                style={{ position: 'absolute', right: '0.5rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--fh-text)', opacity: 0.6 }}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`} style={{ fontSize: '1.2rem' }}></i>
+              </button>
+            </div>
           </div>
           <button type="submit" className="btn-fh-primary btn w-100 mb-3" disabled={loading}>
             {loading ? <span className="spinner-border spinner-border-sm" /> : 'Sign In'}
