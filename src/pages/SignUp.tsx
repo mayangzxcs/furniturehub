@@ -42,9 +42,15 @@ export default function SignUp() {
     } else {
       // No email verification required - account created successfully
       // Sign out immediately to prevent auto-login (user must be approved first)
-      await signOut()
+      try {
+        await signOut()
+        console.log('SignUp: signOut completed successfully')
+      } catch (err) {
+        console.error('SignUp: signOut error:', err)
+      }
       // Set flag in sessionStorage to show Account Created screen after reload
       sessionStorage.setItem('showAccountCreated', 'true')
+      console.log('SignUp: sessionStorage set, reloading page...')
       // Reload the page to ensure navbar updates immediately
       window.location.reload()
     }
