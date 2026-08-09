@@ -13,6 +13,7 @@ import Trending from './pages/Trending'
 import Search from './pages/Search'
 import Favorites from './pages/Favorites'
 import Chat from './pages/Chat'
+import Notifications from './pages/Notifications'
 import Profile from './pages/Profile'
 import EditProfile from './pages/EditProfile'
 import AdminDashboard from './pages/AdminDashboard'
@@ -55,6 +56,7 @@ function AppRoutes() {
         <Route path="/search" element={<Search />} />
         <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
         <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        <Route path="/notifications" element={<ProtectedRoute adminOnly><Notifications /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/:id" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />

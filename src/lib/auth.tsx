@@ -116,6 +116,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return { error: error.message, requiresVerification: false }
       }
+      
+      // Notify all admins about the new signup
+      if (data.user) {
+        try {
+          const { data: admins } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('role', 'admin')
+          
+          if (admins && admins.length > 0) {
+            // Create notifications for each admin
+            const notifications = admins.map(admin => ({
+              user_id: admin.id,
+              type: 'new_account',
+              title: '🆕 New Account Created',
+              body: `${displayName} (${email}) just signed up and is waiting for approval.`,
+              link: '/admin',
+              is_read: false,
+            }))
+            
+            await supabase
+              .from('notifications')
+              .insert(notifications)
+          }
+        } catch (notifError) {
+          console.error('Failed to create admin notification:', notifError)
+          // Don't fail signup if notification fails
+        }
+      }
+      
       // data.requires_verification will be true — user must verify email first
       return { error: null, requiresVerification: (data as any)?.requires_verification ?? false }
     }

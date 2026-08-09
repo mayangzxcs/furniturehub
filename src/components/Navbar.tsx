@@ -31,6 +31,27 @@ export default function Navbar() {
     if (!profile) return
     loadNotifications()
     loadUnreadMessages()
+    
+    // Subscribe to real-time notifications
+    const channel = supabase
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${profile.id}`,
+        },
+        () => {
+          loadNotifications()
+        }
+      )
+      .subscribe()
+    
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [profile])
 
   async function loadUnreadMessages() {
@@ -112,9 +133,21 @@ export default function Navbar() {
               <Link to="/trending" className={`fh-nav-link nav-link ${isActive('/trending') ? 'active' : ''}`}>Trending</Link>
             </li>
             {profile?.role === 'admin' && (
-              <li className="nav-item">
-                <Link to="/admin" className={`fh-nav-link nav-link ${isActive('/admin') ? 'active' : ''}`}>Dashboard</Link>
-              </li>
+              <>
+                <li className="nav-item">
+                  <Link to="/admin" className={`fh-nav-link nav-link ${isActive('/admin') ? 'active' : ''}`}>Dashboard</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/notifications" className={`fh-nav-link nav-link ${isActive('/notifications') ? 'active' : ''}`} style={{ position: 'relative' }}>
+                    Notifications
+                    {unreadCount > 0 && (
+                      <span className="badge bg-danger ms-1" style={{ fontSize: '0.7rem' }}>
+                        {unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              </>
             )}
           </ul>
 
