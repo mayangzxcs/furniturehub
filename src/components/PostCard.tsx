@@ -41,9 +41,10 @@ export default function PostCard({ post, onLightbox, onFavoriteChange }: Props) 
         await supabase.from('notifications').insert({
           user_id: post.user_id,
           type: 'like',
-          title: 'New Like',
+          title: '❤️ New Like',
           body: `${profile.display_name} liked your post`,
           link: `/post/${post.id}`,
+          is_read: false,
         })
       }
     }

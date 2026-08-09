@@ -93,8 +93,9 @@ export default function PostDetail() {
      loadComments()
      if (post && post.user_id !== profile.id) {
        await supabase.from('notifications').insert({
-         user_id: post.user_id, type: 'comment', title: 'New Comment',
+         user_id: post.user_id, type: 'comment', title: '💬 New Comment',
          body: `${profile.display_name} commented on your post`, link: `/post/${id}`,
+         is_read: false,
        })
      }
    }
@@ -104,6 +105,22 @@ export default function PostDetail() {
      if (!replyContent.trim()) return
      const { error } = await supabase.from('comments').insert({ post_id: id, user_id: profile.id, parent_id: parentId, content: replyContent })
      if (error) { showToast('Failed to post reply', 'error'); return }
+     
+     // Notify parent comment author
+     const { data: parentComment } = await supabase
+       .from('comments')
+       .select('user_id')
+       .eq('id', parentId)
+       .single()
+     
+     if (parentComment && parentComment.user_id !== profile.id) {
+       await supabase.from('notifications').insert({
+         user_id: parentComment.user_id, type: 'comment', title: '💬 New Reply',
+         body: `${profile.display_name} replied to your comment`, link: `/post/${id}`,
+         is_read: false,
+       })
+     }
+     
      setReplyTo(null)
      setReplyContent('')
      setCommentsCount(c => c + 1)
@@ -137,8 +154,9 @@ export default function PostDetail() {
       await supabase.from('likes').insert({ post_id: id, user_id: profile.id })
       if (post && post.user_id !== profile.id) {
         await supabase.from('notifications').insert({
-          user_id: post.user_id, type: 'like', title: 'New Like',
+          user_id: post.user_id, type: 'like', title: '❤️ New Like',
           body: `${profile.display_name} liked your post`, link: `/post/${id}`,
+          is_read: false,
         })
       }
     }
