@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
@@ -9,7 +9,6 @@ import Lightbox from '../components/Lightbox'
 export default function PostDetail() {
   const { id } = useParams()
   const { profile } = useAuth()
-  const navigate = useNavigate()
   const [post, setPost] = useState<PostWithRelations | null>(null)
   const [loading, setLoading] = useState(true)
   const [comments, setComments] = useState<Comment[]>([])
@@ -95,7 +94,7 @@ export default function PostDetail() {
   }, [id])
 
    async function handleAddComment() {
-     if (!profile) { navigate('/signin'); return }
+     if (!profile) { showToast('Sign in to comment', 'info'); return }
      if (!newComment.trim()) return
      const { error } = await supabase.from('comments').insert({ post_id: id, user_id: profile.id, content: newComment })
      if (error) { showToast('Failed to post comment', 'error'); return }
@@ -110,16 +109,16 @@ export default function PostDetail() {
      }
    }
 
-  async function handleReply(parentId: string) {
-    if (!profile) { navigate('/signin'); return }
-    if (!replyContent.trim()) return
-    const { error } = await supabase.from('comments').insert({ post_id: id, user_id: profile.id, parent_id: parentId, content: replyContent })
-    if (error) { showToast('Failed to post reply', 'error'); return }
-    setReplyTo(null)
-    setReplyContent('')
-    setCommentsCount(c => c + 1)
-    loadComments()
-  }
+   async function handleReply(parentId: string) {
+     if (!profile) { showToast('Sign in to reply', 'info'); return }
+     if (!replyContent.trim()) return
+     const { error } = await supabase.from('comments').insert({ post_id: id, user_id: profile.id, parent_id: parentId, content: replyContent })
+     if (error) { showToast('Failed to post reply', 'error'); return }
+     setReplyTo(null)
+     setReplyContent('')
+     setCommentsCount(c => c + 1)
+     loadComments()
+   }
 
   async function handleEditComment(commentId: string) {
     if (!editingId || !editContent.trim()) return
@@ -139,7 +138,7 @@ export default function PostDetail() {
   }
 
   async function toggleLike() {
-    if (!profile) { navigate('/signin'); return }
+    if (!profile) { showToast('Sign in to like posts', 'info'); return }
     if (liked) {
       setLiked(false); setLikesCount(c => c - 1)
       await supabase.from('likes').delete().eq('post_id', id).eq('user_id', profile.id)
@@ -156,7 +155,7 @@ export default function PostDetail() {
   }
 
   async function toggleFavorite() {
-    if (!profile) { navigate('/signin'); return }
+    if (!profile) { showToast('Sign in to save favorites', 'info'); return }
     if (favorited) {
       setFavorited(false)
       await supabase.from('favorites').delete().eq('post_id', id).eq('user_id', profile.id)
@@ -329,10 +328,17 @@ export default function PostDetail() {
       {/* Comments */}
       <section className="mt-4">
         <h3 className="mb-3" style={{ fontSize: '1.4rem' }}>Comments</h3>
-        <div className="fh-card p-3 mb-3">
-          <textarea className="fh-form-control mb-2" placeholder="Write a comment..." rows={2} value={newComment} onChange={e => setNewComment(e.target.value)} />
-          <button className="btn btn-fh-primary btn-sm" onClick={handleAddComment} disabled={!newComment.trim()}>Post Comment</button>
-        </div>
+        {profile ? (
+          <div className="fh-card p-3 mb-3">
+            <textarea className="fh-form-control mb-2" placeholder="Write a comment..." rows={2} value={newComment} onChange={e => setNewComment(e.target.value)} />
+            <button className="btn btn-fh-primary btn-sm" onClick={handleAddComment} disabled={!newComment.trim()}>Post Comment</button>
+          </div>
+        ) : (
+          <div className="fh-card p-3 mb-3 text-center">
+            <p className="text-muted mb-2">Sign in to comment on this post</p>
+            <Link to="/signin" className="btn btn-fh-outline btn-sm">Sign In</Link>
+          </div>
+        )}
         {comments.length === 0 ? (
           <p className="text-muted text-center py-3">No comments yet. Be the first!</p>
         ) : (

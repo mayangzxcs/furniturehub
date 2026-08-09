@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { supabase } from '../lib/supabase'
 import { showToast } from '../lib/toast'
@@ -13,7 +13,6 @@ interface Props {
 
 export default function PostCard({ post, onLightbox, onFavoriteChange }: Props) {
   const { profile } = useAuth()
-  const navigate = useNavigate()
   const [liked, setLiked] = useState(post.liked_by_me ?? false)
   const [likesCount, setLikesCount] = useState(post.likes_count ?? 0)
   const [commentsCount] = useState(post.comments_count ?? 0)
@@ -26,7 +25,7 @@ export default function PostCard({ post, onLightbox, onFavoriteChange }: Props) 
   const profileUrl = profile?.id === post.user_id ? '/profile' : `/profile/${post.user_id}`
 
   async function toggleLike() {
-    if (!profile) { navigate('/signin'); return }
+    if (!profile) { showToast('Sign in to like posts', 'info'); return }
     setHeartAnim(true)
     setTimeout(() => setHeartAnim(false), 400)
 
@@ -51,7 +50,7 @@ export default function PostCard({ post, onLightbox, onFavoriteChange }: Props) 
   }
 
   async function toggleFavorite() {
-    if (!profile) { navigate('/signin'); return }
+    if (!profile) { showToast('Sign in to save favorites', 'info'); return }
     if (favorited) {
       setFavorited(false)
       await supabase.from('favorites').delete().eq('post_id', post.id).eq('user_id', profile.id)
@@ -66,6 +65,7 @@ export default function PostCard({ post, onLightbox, onFavoriteChange }: Props) 
   }
 
   function handleShare() {
+    if (!profile) { showToast('Sign in to share posts', 'info'); return }
     const url = `${window.location.origin}/post/${post.id}`
     if (navigator.share) {
       navigator.share({ title: 'FurnitureHub', text: post.caption, url }).catch(() => {})
