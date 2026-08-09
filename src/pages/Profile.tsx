@@ -25,17 +25,64 @@ export default function Profile() {
         .select(`*, category:categories(*), user:profiles(*), post_images(*)`)
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
-      setPosts((postData as PostWithRelations[]) || [])
+      const rawPosts = (postData as PostWithRelations[]) || []
+      setPosts(rawPosts)
+      setStats({ posts: rawPosts.length, likes: 0, favorites: 0 })
 
-      const postIds = (postData as PostWithRelations[])?.map(p => p.id) || []
+      // Enrich posts with counts and user interaction state
+      const postIds = rawPosts.map(p => p.id)
       if (postIds.length) {
-        const { count: likesCount } = await supabase.from('likes').select('id', { count: 'exact', head: true }).in('post_id', postIds)
-        const { count: favCount } = await supabase.from('favorites').select('id', { count: 'exact', head: true }).in('post_id', postIds)
-        setStats({ posts: (postData as PostWithRelations[])?.length || 0, likes: likesCount || 0, favorites: favCount || 0 })
+        const [likesRes, commentsRes, sharesRes, favoritesRes, likesCountRes, favCountRes] = await Promise.all([
+          supabase.from('likes').select('post_id, user_id').in('post_id', postIds),
+          supabase.from('comments').select('post_id').in('post_id', postIds),
+          supabase.from('shares').select('post_id').in('post_id', postIds),
+          currentUser ? supabase.from('favorites').select('post_id').in('post_id', postIds).eq('user_id', currentUser.id) : Promise.resolve({ data: [] }),
+          supabase.from('likes').select('id', { count: 'exact', head: true }).in('post_id', postIds),
+          supabase.from('favorites').select('id', { count: 'exact', head: true }).in('post_id', postIds),
+        ])
+
+        const likesMap = new Map<string, number>()
+        const likedByMe = new Set<string>()
+        for (const l of (likesRes.data as { post_id: string; user_id: string }[] || [])) {
+          likesMap.set(l.post_id, (likesMap.get(l.post_id) || 0) + 1)
+          if (l.user_id === currentUser?.id) likedByMe.add(l.post_id)
+        }
+
+        const commentsMap = new Map<string, number>()
+        for (const c of (commentsRes.data as { post_id: string }[] || [])) {
+          commentsMap.set(c.post_id, (commentsMap.get(c.post_id) || 0) + 1)
+        }
+
+        const sharesMap = new Map<string, number>()
+        for (const s of (sharesRes.data as { post_id: string }[] || [])) {
+          sharesMap.set(s.post_id, (sharesMap.get(s.post_id) || 0) + 1)
+        }
+
+        const favSet = new Set<string>()
+        for (const f of (favoritesRes.data as { post_id: string }[] || [])) {
+          favSet.add(f.post_id)
+        }
+
+        const enriched = rawPosts.map(p => ({
+          ...p,
+          post_images: p.post_images?.sort((a, b) => a.sort_order - b.sort_order),
+          likes_count: likesMap.get(p.id) || 0,
+          comments_count: commentsMap.get(p.id) || 0,
+          shares_count: sharesMap.get(p.id) || 0,
+          liked_by_me: likedByMe.has(p.id),
+          favorited_by_me: favSet.has(p.id),
+        }))
+        setPosts(enriched)
+
+        setStats({
+          posts: rawPosts.length,
+          likes: likesCountRes.count || 0,
+          favorites: favCountRes.count || 0,
+        })
       }
       setLoading(false)
     })
-  }, [userId])
+  }, [userId, currentUser])
 
   const isOwn = currentUser?.id === userId
 

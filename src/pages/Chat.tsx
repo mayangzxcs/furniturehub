@@ -47,21 +47,35 @@ export default function Chat() {
 
     const { data: convs } = await supabase
       .from('conversations')
-      .select('*')
+      .select('*, viewer:profiles!conversations_viewer_id_fkey(*), admin:profiles!conversations_admin_id_fkey(*)')
       .order('created_at', { ascending: false })
 
     const allConvs = (convs as ConvWithMeta[]) || []
 
+    // Enrich conversations with last message and unread count
+    const enrichedConvs = await Promise.all(allConvs.map(async (c) => {
+      const [lastMsgRes, unreadRes] = await Promise.all([
+        supabase.from('messages').select('content, created_at').eq('conversation_id', c.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+        profile ? supabase.from('messages').select('id', { count: 'exact', head: true }).eq('conversation_id', c.id).eq('is_read', false).neq('sender_id', profile.id) : Promise.resolve({ count: 0 }),
+      ])
+      return {
+        ...c,
+        last_message: (lastMsgRes.data as { content: string } | null)?.content || '',
+        last_message_at: (lastMsgRes.data as { created_at: string } | null)?.created_at || '',
+        unread_count: unreadRes.count || 0,
+      } as ConvWithMeta
+    }))
+
     if (isAdmin) {
       // Admin: show all conversations (assigned + unassigned)
-      setConversations(allConvs)
+      setConversations(enrichedConvs)
       // Auto-select first conversation if none selected
-      if (!activeConvId && allConvs.length > 0) {
-        selectConversation(allConvs[0])
+      if (!activeConvId && enrichedConvs.length > 0) {
+        selectConversation(enrichedConvs[0])
       }
     } else {
       // Viewer: find or create their conversation
-      let conv = allConvs.find(c => c.viewer_id === profile.id) || null
+      let conv = enrichedConvs.find(c => c.viewer_id === profile.id) || null
       if (!conv) {
         // Create a new conversation
         const { data: admins } = await supabase
@@ -75,13 +89,11 @@ export default function Chat() {
         const { data: newConv } = await supabase
           .from('conversations')
           .insert({ viewer_id: profile.id, admin_id: admin?.id || null })
+          .select('*, viewer:profiles!conversations_viewer_id_fkey(*), admin:profiles!conversations_admin_id_fkey(*)')
+          .single()
 
         if (newConv) {
-          conv = {
-            ...(newConv as any),
-            viewer: { id: profile.id, display_name: profile.display_name, avatar_url: profile.avatar_url } as Profile,
-            admin: admin ? { id: admin.id, display_name: admin.display_name, avatar_url: admin.avatar_url } as Profile : null,
-          } as ConvWithMeta
+          conv = newConv as ConvWithMeta
         }
       }
       if (conv) {
@@ -111,15 +123,27 @@ export default function Chat() {
   function startPolling(convId: string) {
     if (pollRef.current) clearInterval(pollRef.current)
     pollRef.current = setInterval(async () => {
-      // Refresh conversations list
+      // Refresh conversations list with profiles and unread counts
       const { data: convs } = await supabase
         .from('conversations')
-        .select('*')
+        .select('*, viewer:profiles!conversations_viewer_id_fkey(*), admin:profiles!conversations_admin_id_fkey(*)')
         .order('created_at', { ascending: false })
       if (convs) {
+        const enriched = await Promise.all((convs as ConvWithMeta[]).map(async (c) => {
+          const [lastMsgRes, unreadRes] = await Promise.all([
+            supabase.from('messages').select('content, created_at').eq('conversation_id', c.id).order('created_at', { ascending: false }).limit(1).maybeSingle(),
+            profile ? supabase.from('messages').select('id', { count: 'exact', head: true }).eq('conversation_id', c.id).eq('is_read', false).neq('sender_id', profile.id) : Promise.resolve({ count: 0 }),
+          ])
+          return {
+            ...c,
+            last_message: (lastMsgRes.data as { content: string } | null)?.content || '',
+            last_message_at: (lastMsgRes.data as { created_at: string } | null)?.created_at || '',
+            unread_count: unreadRes.count || 0,
+          } as ConvWithMeta
+        }))
         setConversations(prev => {
           const map = new Map(prev.map(c => [c.id, c]))
-          for (const c of (convs as ConvWithMeta[])) {
+          for (const c of enriched) {
             map.set(c.id, c)
           }
           return Array.from(map.values())

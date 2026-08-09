@@ -53,18 +53,23 @@ export default function Categories() {
 export function CategoryView() {
   const { slug } = useParams()
   const [category, setCategory] = useState<Category | null>(null)
-  const [categoryId, setCategoryId] = useState<string | null>(null)
+  const [categoryId, setCategoryId] = useState<string | undefined>(undefined)
+  const [categoryLoading, setCategoryLoading] = useState(true)
   const { posts, loading, loadingMore } = useInfinitePosts({
-    filter: (q: any) => q.eq('category_id', categoryId),
-    key: categoryId || undefined,
+    filter: categoryId ? (q: any) => q.eq('category_id', categoryId) : undefined,
+    key: categoryId,
+    enabled: !!categoryId,
   })
   const [lightbox, setLightbox] = useState<{ urls: string[]; index: number } | null>(null)
 
   useEffect(() => {
+    setCategoryLoading(true)
+    setCategoryId(undefined)
     supabase.from('categories').select('*').eq('slug', slug).maybeSingle().then(({ data }) => {
       const cat = data as Category | null
       setCategory(cat)
-      setCategoryId(cat?.id || null)
+      setCategoryId(cat?.id || undefined)
+      setCategoryLoading(false)
     })
   }, [slug])
 
@@ -77,7 +82,7 @@ export function CategoryView() {
           <p style={{ opacity: 0.6 }}>{category.description}</p>
         </div>
       )}
-      {loading ? (
+      {categoryLoading || loading ? (
         <div className="row g-4">{[...Array(3)].map((_, i) => <div key={i} className="col-md-6 col-lg-4"><PostCardSkeleton /></div>)}</div>
       ) : posts.length === 0 ? (
         <div className="text-center py-5"><p className="text-muted">No posts in this category yet.</p><Link to="/feed" className="btn-fh-outline btn">Back to Feed</Link></div>

@@ -4,10 +4,6 @@ import { useAuth } from '../lib/auth'
 import { useTheme } from '../lib/theme'
 import { supabase } from '../lib/supabase'
 import type { AppNotification } from '../lib/types'
-interface ConvWithMeta {
-  id: string
-  unread_count?: number
-}
 
 export default function Navbar() {
   const { profile, signOut } = useAuth()
@@ -31,17 +27,35 @@ export default function Navbar() {
     if (!profile) return
     loadNotifications()
     loadUnreadMessages()
+
+    // Poll for unread message count so it updates after messages are read
+    const interval = setInterval(() => {
+      loadUnreadMessages()
+    }, 5000)
+
+    return () => clearInterval(interval)
   }, [profile])
 
   async function loadUnreadMessages() {
     if (!profile) return
-    const { data } = await supabase
+    // Get all conversations the user participates in
+    const { data: convs } = await supabase
       .from('conversations')
-      .select('*')
-      .order('created_at', { ascending: false })
-    const convs = (data as ConvWithMeta[]) || []
-    const total = convs.reduce((sum, c) => sum + (c.unread_count || 0), 0)
-    setUnreadMessages(total)
+      .select('id')
+      .or(`viewer_id.eq.${profile.id},admin_id.eq.${profile.id}`)
+
+    const convIds = (convs as { id: string }[] || []).map(c => c.id)
+    if (convIds.length === 0) { setUnreadMessages(0); return }
+
+    // Count unread messages across all conversations
+    const { count } = await supabase
+      .from('messages')
+      .select('id', { count: 'exact', head: true })
+      .in('conversation_id', convIds)
+      .eq('is_read', false)
+      .neq('sender_id', profile.id)
+
+    setUnreadMessages(count || 0)
   }
 
   async function loadNotifications() {
