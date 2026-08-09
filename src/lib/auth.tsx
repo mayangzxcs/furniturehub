@@ -80,6 +80,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (profile && profile.status !== 'active') {
           // Sign out the user immediately
           await supabase.auth.signOut()
+          setSession(null)
+          setProfile(null)
           if (profile.status === 'pending') {
             return { error: 'Your account is pending approval. Please wait for an administrator to approve your account.' }
           } else if (profile.status === 'disabled') {
