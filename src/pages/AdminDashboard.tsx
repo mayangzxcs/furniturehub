@@ -277,6 +277,8 @@ export default function AdminDashboard() {
                 <>
                   {u.status === 'active' ? (
                     <button className="btn btn-sm btn-outline-warning" onClick={() => updateUserStatus(u.id, 'disabled')}><i className="bi bi-shield-exclamation me-1"></i>Disable</button>
+                  ) : u.status === 'pending' ? (
+                    <button className="btn btn-sm btn-outline-success" onClick={() => updateUserStatus(u.id, 'active')}><i className="bi bi-check-circle me-1"></i>Approve</button>
                   ) : (
                     <button className="btn btn-sm btn-outline-success" onClick={() => updateUserStatus(u.id, 'active')}><i className="bi bi-check-circle me-1"></i>Enable</button>
                   )}
