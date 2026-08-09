@@ -2,10 +2,9 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
-import { supabase } from '../lib/supabase'
 
 export default function SignUp() {
-  const { signUp, signOut } = useAuth()
+  const { signUp, signOut, session } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -35,10 +34,19 @@ export default function SignUp() {
       // No email verification required - account created successfully
       // Sign out immediately to prevent auto-login (user must be approved first)
       await signOut()
-      // Wait a bit for the auth state to update, then show the "Account Created" screen
-      setTimeout(() => {
-        setVerificationSent(true)
+      // Wait for auth state to update in navbar, then show the "Account Created" screen
+      // Check if session is null (logged out) before showing the screen
+      const checkSession = setInterval(() => {
+        if (!session) {
+          clearInterval(checkSession)
+          setVerificationSent(true)
+        }
       }, 100)
+      // Fallback: show screen after 2 seconds even if session check fails
+      setTimeout(() => {
+        clearInterval(checkSession)
+        setVerificationSent(true)
+      }, 2000)
     }
   }
 
