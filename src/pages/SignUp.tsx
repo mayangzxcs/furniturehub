@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
@@ -12,6 +12,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const [verificationSent, setVerificationSent] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const logoutCalled = useRef(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -34,19 +35,11 @@ export default function SignUp() {
       // No email verification required - account created successfully
       // Sign out immediately to prevent auto-login (user must be approved first)
       await signOut()
-      // Wait for auth state to update in navbar, then show the "Account Created" screen
-      // Check if session is null (logged out) before showing the screen
-      const checkSession = setInterval(() => {
-        if (!session) {
-          clearInterval(checkSession)
-          setVerificationSent(true)
-        }
-      }, 100)
-      // Fallback: show screen after 2 seconds even if session check fails
+      // Show the "Account Created" screen after a short delay
+      // The navbar will update automatically via the auth state change listener
       setTimeout(() => {
-        clearInterval(checkSession)
         setVerificationSent(true)
-      }, 2000)
+      }, 500)
     }
   }
 
