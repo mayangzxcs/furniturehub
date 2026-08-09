@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
@@ -12,6 +12,15 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false)
   const [verificationSent, setVerificationSent] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+
+  // Check if we should show the Account Created screen (after page reload)
+  useEffect(() => {
+    const showAccountCreated = sessionStorage.getItem('showAccountCreated')
+    if (showAccountCreated === 'true') {
+      setVerificationSent(true)
+      sessionStorage.removeItem('showAccountCreated')
+    }
+  }, [])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
