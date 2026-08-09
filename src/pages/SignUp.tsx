@@ -1,12 +1,11 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
 import { supabase } from '../lib/supabase'
 
 export default function SignUp() {
   const { signUp } = useAuth()
-  const navigate = useNavigate()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -36,8 +35,8 @@ export default function SignUp() {
       // No email verification required - account created successfully
       // Sign out immediately to prevent auto-login (user must be approved first)
       await supabase.auth.signOut()
-      showToast('Account created! Please wait for admin approval.', 'success')
-      navigate('/signin')
+      // Show the "Account Created" screen instead of redirecting to signin
+      setVerificationSent(true)
     }
   }
 
