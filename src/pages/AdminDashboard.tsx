@@ -104,8 +104,8 @@ export default function AdminDashboard() {
   }
 
   async function updateUserStatus(userId: string, status: string) {
-    const { error } = await supabase.from('profiles').update({ status }).eq('id', userId)
-    if (error) { showToast('Failed to update', 'error'); return }
+    const { error } = await supabase.rpc('admin_update_user_status', { p_user_id: userId, p_status: status })
+    if (error) { showToast('Failed to update: ' + error.message, 'error'); return }
     showToast(`User ${status}`, 'success')
     loadUsers()
     logActivity('update_user', `Updated user status to ${status}`, { userId, status })
@@ -113,8 +113,8 @@ export default function AdminDashboard() {
 
   async function deleteUser(userId: string) {
     if (!confirm('Delete this user? This cannot be undone.')) return
-    const { error } = await supabase.from('profiles').delete().eq('id', userId)
-    if (error) { showToast('Failed to delete', 'error'); return }
+    const { error } = await supabase.rpc('admin_delete_user', { p_user_id: userId })
+    if (error) { showToast('Failed to delete: ' + error.message, 'error'); return }
     showToast('User deleted', 'success')
     loadUsers()
     logActivity('delete_user', 'Deleted user', { userId })

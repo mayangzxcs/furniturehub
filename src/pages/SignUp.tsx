@@ -4,13 +4,14 @@ import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
 
 export default function SignUp() {
-  const { signUp, signOut } = useAuth()
+  const { signUp } = useAuth()
   const navigate = useNavigate()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [loading, setLoading] = useState(false)
+  const [verificationSent, setVerificationSent] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -23,21 +24,37 @@ export default function SignUp() {
       return
     }
     setLoading(true)
-    const { error, requiresVerification, rateLimited } = await signUp(email, password, displayName)
+    const { error, requiresVerification } = await signUp(email, password, displayName)
     setLoading(false)
     if (error) {
       showToast(error, 'error')
+    } else if (requiresVerification) {
+      setVerificationSent(true)
     } else {
-      // Signup succeeded — sign the user out so they're not auto-logged-in
-      // (Supabase creates a session on signUp). Then redirect to sign-in.
-      if (rateLimited) {
-        showToast('Account created! (Confirmation email rate-limited — please try again later)', 'info')
-      } else {
-        showToast('Account created successfully!', 'success')
-      }
-      await signOut()
+      // No email verification required - account created successfully
+      showToast('Account created! You can now sign in.', 'success')
       navigate('/signin')
     }
+  }
+
+  if (verificationSent) {
+    return (
+      <div className="auth-container">
+        <div className="auth-card fh-card text-center">
+          <div className="mb-4" style={{ fontSize: '3rem' }}>
+            <i className="bi bi-clock-history text-warning"></i>
+          </div>
+          <h1 className="auth-title">Account Created!</h1>
+          <p className="auth-subtitle">
+            Your account has been created successfully. An administrator will review and activate your account shortly.
+          </p>
+          <p className="text-muted" style={{ fontSize: '0.9rem' }}>
+            You'll be able to sign in once your account is approved.
+          </p>
+          <Link to="/signin" className="btn-fh-primary btn mt-3">Go to Sign In</Link>
+        </div>
+      </div>
+    )
   }
 
   return (
