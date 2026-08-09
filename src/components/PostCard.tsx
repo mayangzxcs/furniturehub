@@ -135,19 +135,38 @@ export default function PostCard({ post, onLightbox, onFavoriteChange }: Props) 
       )}
 
       <div className="post-card-actions">
-        <button className={`post-action-btn ${liked ? 'liked' : ''}`} onClick={toggleLike} aria-label="Like">
+        <button 
+          className={`post-action-btn ${liked ? 'liked' : ''} ${!profile ? 'disabled-action' : ''}`} 
+          onClick={toggleLike} 
+          disabled={!profile}
+          title={!profile ? 'Sign in to like posts' : 'Like'}
+          aria-label="Like"
+        >
           <i className={`bi ${liked ? 'bi-heart-fill heart-anim' : 'bi-heart'} ${heartAnim ? 'heart-anim' : ''}`}></i>
           <span>{likesCount}</span>
         </button>
-        <Link to={`/post/${post.id}`} className="post-action-btn text-decoration-none" aria-label="Comments">
+        <Link to={`/post/${post.id}`} className="post-action-btn text-decoration-none" aria-label="View comments">
           <i className="bi bi-chat"></i>
           <span>{commentsCount}</span>
         </Link>
-        <button className="post-action-btn" onClick={handleShare} aria-label="Share">
+        <button 
+          className={`post-action-btn ${!profile ? 'disabled-action' : ''}`} 
+          onClick={handleShare} 
+          disabled={!profile}
+          title={!profile ? 'Sign in to share posts' : 'Share'}
+          aria-label="Share"
+        >
           <i className="bi bi-share"></i>
           <span>{post.shares_count ?? 0}</span>
         </button>
-        <button className={`post-action-btn ${favorited ? 'favorited' : ''}`} onClick={toggleFavorite} aria-label="Favorite" style={{ marginLeft: 'auto' }}>
+        <button 
+          className={`post-action-btn ${favorited ? 'favorited' : ''} ${!profile ? 'disabled-action' : ''}`} 
+          onClick={toggleFavorite} 
+          disabled={!profile}
+          title={!profile ? 'Sign in to save favorites' : 'Save to favorites'}
+          aria-label="Favorite" 
+          style={{ marginLeft: 'auto' }}
+        >
           <i className={`bi ${favorited ? 'bi-bookmark-fill' : 'bi-bookmark'}`}></i>
         </button>
       </div>

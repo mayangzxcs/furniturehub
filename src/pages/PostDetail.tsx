@@ -304,12 +304,32 @@ export default function PostDetail() {
 
         {/* Actions */}
         <div className="post-card-actions">
-          <button className={`post-action-btn ${liked ? 'liked' : ''}`} onClick={toggleLike}>
+          <button 
+            className={`post-action-btn ${liked ? 'liked' : ''} ${!profile ? 'disabled-action' : ''}`} 
+            onClick={toggleLike}
+            disabled={!profile}
+            title={!profile ? 'Sign in to like posts' : 'Like'}
+          >
             <i className={`bi ${liked ? 'bi-heart-fill' : 'bi-heart'}`}></i><span>{likesCount}</span>
           </button>
-          <div className="post-action-btn"><i className="bi bi-chat"></i><span>{commentsCount}</span></div>
-          <button className="post-action-btn" onClick={() => setShowShareModal(true)}><i className="bi bi-share"></i><span>{post.shares_count}</span></button>
-          <button className={`post-action-btn ${favorited ? 'favorited' : ''}`} onClick={toggleFavorite} style={{ marginLeft: 'auto' }}>
+          <div className="post-action-btn" title="View comments">
+            <i className="bi bi-chat"></i><span>{commentsCount}</span>
+          </div>
+          <button 
+            className={`post-action-btn ${!profile ? 'disabled-action' : ''}`} 
+            onClick={() => setShowShareModal(true)}
+            disabled={!profile}
+            title={!profile ? 'Sign in to share posts' : 'Share'}
+          >
+            <i className="bi bi-share"></i><span>{post.shares_count}</span>
+          </button>
+          <button 
+            className={`post-action-btn ${favorited ? 'favorited' : ''} ${!profile ? 'disabled-action' : ''}`} 
+            onClick={toggleFavorite}
+            disabled={!profile}
+            title={!profile ? 'Sign in to save favorites' : 'Save to favorites'}
+            style={{ marginLeft: 'auto' }}
+          >
             <i className={`bi ${favorited ? 'bi-bookmark-fill' : 'bi-bookmark'}`}></i>
           </button>
         </div>

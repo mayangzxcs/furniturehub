@@ -304,6 +304,22 @@ a:hover { color: var(--fh-primary-dark); }
 .post-action-btn.liked { color: var(--fh-error); }
 .post-action-btn.favorited { color: var(--fh-warning); }
 .post-action-btn i { font-size: 1.3rem; }
+.post-action-btn.disabled-action {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: auto;
+}
+.post-action-btn.disabled-action:hover {
+  background: none;
+  color: var(--fh-text);
+}
+.post-action-btn:disabled,
+.post-action-btn:disabled:hover {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: none;
+  color: var(--fh-text);
+}
 
 /* ===== Category Badge ===== */
 .category-badge {
