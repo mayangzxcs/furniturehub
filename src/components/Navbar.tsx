@@ -133,21 +133,9 @@ export default function Navbar() {
               <Link to="/trending" className={`fh-nav-link nav-link ${isActive('/trending') ? 'active' : ''}`}>Trending</Link>
             </li>
             {profile?.role === 'admin' && (
-              <>
-                <li className="nav-item">
-                  <Link to="/admin" className={`fh-nav-link nav-link ${isActive('/admin') ? 'active' : ''}`}>Dashboard</Link>
-                </li>
-                <li className="nav-item">
-                  <Link to="/notifications" className={`fh-nav-link nav-link ${isActive('/notifications') ? 'active' : ''}`} style={{ position: 'relative' }}>
-                    Notifications
-                    {unreadCount > 0 && (
-                      <span className="badge bg-danger ms-1" style={{ fontSize: '0.7rem' }}>
-                        {unreadCount}
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              </>
+              <li className="nav-item">
+                <Link to="/admin" className={`fh-nav-link nav-link ${isActive('/admin') ? 'active' : ''}`}>Dashboard</Link>
+              </li>
             )}
           </ul>
 
