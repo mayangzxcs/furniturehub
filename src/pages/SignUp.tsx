@@ -5,7 +5,7 @@ import { showToast } from '../lib/toast'
 import { supabase } from '../lib/supabase'
 
 export default function SignUp() {
-  const { signUp } = useAuth()
+  const { signUp, signOut } = useAuth()
   const [displayName, setDisplayName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -34,7 +34,7 @@ export default function SignUp() {
     } else {
       // No email verification required - account created successfully
       // Sign out immediately to prevent auto-login (user must be approved first)
-      await supabase.auth.signOut()
+      await signOut()
       // Show the "Account Created" screen instead of redirecting to signin
       setVerificationSent(true)
     }
