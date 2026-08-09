@@ -54,19 +54,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   async function signIn(email: string, password: string) {
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
-    return { error: error?.message ?? null }
+    // Retry up to 3 times with delay if we hit rate limits (429)
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        if (error.status === 429 && attempt < 3) {
+          const delay = attempt * 5000 // 5s, 10s
+          await new Promise(resolve => setTimeout(resolve, delay))
+          continue
+        }
+        if (error.status === 429) {
+          return { error: 'Too many sign-in attempts. Please wait a few minutes and try again.' }
+        }
+        return { error: error.message }
+      }
+      return { error: null }
+    }
+    return { error: 'Sign-in failed. Please try again.' }
   }
 
   async function signUp(email: string, password: string, displayName: string): Promise<{ error: string | null; requiresVerification: boolean }> {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { display_name: displayName } },
-    })
-    if (error) return { error: error.message, requiresVerification: false }
-    // data.requires_verification will be true — user must verify email first
-    return { error: null, requiresVerification: (data as any)?.requires_verification ?? false }
+    // Retry up to 3 times with delay if we hit rate limits (429)
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { display_name: displayName } },
+      })
+      if (error) {
+        // If rate limited (429), wait and retry
+        if (error.status === 429 && attempt < 3) {
+          const delay = attempt * 5000 // 5s, 10s
+          await new Promise(resolve => setTimeout(resolve, delay))
+          continue
+        }
+        if (error.status === 429) {
+          return { error: 'Too many sign-up attempts. Please wait a few minutes and try again.', requiresVerification: false }
+        }
+        return { error: error.message, requiresVerification: false }
+      }
+      // data.requires_verification will be true — user must verify email first
+      return { error: null, requiresVerification: (data as any)?.requires_verification ?? false }
+    }
+    return { error: 'Sign-up failed. Please try again.', requiresVerification: false }
   }
 
   async function signOut() {
