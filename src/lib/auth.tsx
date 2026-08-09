@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signIn(email: string, password: string) {
     // Retry up to 3 times with delay if we hit rate limits (429)
     for (let attempt = 1; attempt <= 3; attempt++) {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
       if (error) {
         if (error.status === 429 && attempt < 3) {
           const delay = attempt * 5000 // 5s, 10s
@@ -68,6 +68,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
         return { error: error.message }
       }
+      
+      // Check if user is active before allowing login
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('status')
+          .eq('id', data.user.id)
+          .maybeSingle()
+        
+        if (profile && profile.status !== 'active') {
+          // Sign out the user immediately
+          await supabase.auth.signOut()
+          if (profile.status === 'pending') {
+            return { error: 'Your account is pending approval. Please wait for an administrator to approve your account.' }
+          } else if (profile.status === 'disabled') {
+            return { error: 'Your account has been disabled. Please contact support.' }
+          }
+          return { error: 'Your account is not active. Please contact support.' }
+        }
+      }
+      
       return { error: null }
     }
     return { error: 'Sign-in failed. Please try again.' }

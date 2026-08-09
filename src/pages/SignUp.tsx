@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
+import { supabase } from '../lib/supabase'
 
 export default function SignUp() {
   const { signUp } = useAuth()
@@ -33,7 +34,9 @@ export default function SignUp() {
       setVerificationSent(true)
     } else {
       // No email verification required - account created successfully
-      showToast('Account created! You can now sign in.', 'success')
+      // Sign out immediately to prevent auto-login (user must be approved first)
+      await supabase.auth.signOut()
+      showToast('Account created! Please wait for admin approval.', 'success')
       navigate('/signin')
     }
   }
