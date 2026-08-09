@@ -4,6 +4,10 @@ import { useAuth } from '../lib/auth'
 import { useTheme } from '../lib/theme'
 import { supabase } from '../lib/supabase'
 import type { AppNotification } from '../lib/types'
+interface ConvWithMeta {
+  id: string
+  unread_count?: number
+}
 
 export default function Navbar() {
   const { profile, signOut } = useAuth()
@@ -27,35 +31,38 @@ export default function Navbar() {
     if (!profile) return
     loadNotifications()
     loadUnreadMessages()
-
-    // Poll for unread message count so it updates after messages are read
-    const interval = setInterval(() => {
-      loadUnreadMessages()
-    }, 5000)
-
-    return () => clearInterval(interval)
+    
+    // Subscribe to real-time notifications
+    const channel = supabase
+      .channel('notifications')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${profile.id}`,
+        },
+        () => {
+          loadNotifications()
+        }
+      )
+      .subscribe()
+    
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [profile])
 
   async function loadUnreadMessages() {
     if (!profile) return
-    // Get all conversations the user participates in
-    const { data: convs } = await supabase
+    const { data } = await supabase
       .from('conversations')
-      .select('id')
-      .or(`viewer_id.eq.${profile.id},admin_id.eq.${profile.id}`)
-
-    const convIds = (convs as { id: string }[] || []).map(c => c.id)
-    if (convIds.length === 0) { setUnreadMessages(0); return }
-
-    // Count unread messages across all conversations
-    const { count } = await supabase
-      .from('messages')
-      .select('id', { count: 'exact', head: true })
-      .in('conversation_id', convIds)
-      .eq('is_read', false)
-      .neq('sender_id', profile.id)
-
-    setUnreadMessages(count || 0)
+      .select('*')
+      .order('created_at', { ascending: false })
+    const convs = (data as ConvWithMeta[]) || []
+    const total = convs.reduce((sum, c) => sum + (c.unread_count || 0), 0)
+    setUnreadMessages(total)
   }
 
   async function loadNotifications() {
@@ -126,9 +133,21 @@ export default function Navbar() {
               <Link to="/trending" className={`fh-nav-link nav-link ${isActive('/trending') ? 'active' : ''}`}>Trending</Link>
             </li>
             {profile?.role === 'admin' && (
-              <li className="nav-item">
-                <Link to="/admin" className={`fh-nav-link nav-link ${isActive('/admin') ? 'active' : ''}`}>Dashboard</Link>
-              </li>
+              <>
+                <li className="nav-item">
+                  <Link to="/admin" className={`fh-nav-link nav-link ${isActive('/admin') ? 'active' : ''}`}>Dashboard</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to="/notifications" className={`fh-nav-link nav-link ${isActive('/notifications') ? 'active' : ''}`} style={{ position: 'relative' }}>
+                    Notifications
+                    {unreadCount > 0 && (
+                      <span className="badge bg-danger ms-1" style={{ fontSize: '0.7rem' }}>
+                        {unreadCount}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              </>
             )}
           </ul>
 
