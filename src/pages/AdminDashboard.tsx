@@ -25,6 +25,7 @@ export default function AdminDashboard() {
   const [ratings, setRatings] = useState<(Rating & { user?: Profile | null })[]>([])
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [categoryFormData, setCategoryFormData] = useState({ name: '', slug: '', description: '', icon: '' })
+  const [showEditIconPicker, setShowEditIconPicker] = useState(false)
   const filteredUsers = users.filter(u =>
     u.display_name.toLowerCase().includes(userSearch.toLowerCase()) ||
     u.email.toLowerCase().includes(userSearch.toLowerCase())
@@ -391,14 +392,49 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="mb-3">
-                  <label className="fh-form-label">Icon (Bootstrap Icon Class)</label>
-                  <input
-                    type="text"
-                    className="fh-form-control"
-                    placeholder="e.g., bi-sofa"
-                    value={categoryFormData.icon}
-                    onChange={e => setCategoryFormData({ ...categoryFormData, icon: e.target.value })}
-                  />
+                  <label className="fh-form-label">Icon</label>
+                  <button
+                    type="button"
+                    className="fh-form-control d-flex align-items-center gap-2"
+                    onClick={() => setShowEditIconPicker(!showEditIconPicker)}
+                    style={{ background: 'var(--fh-secondary)', border: '1px solid rgba(0,0,0,0.1)', textAlign: 'left', cursor: 'pointer' }}
+                  >
+                    <i className={`bi ${categoryFormData.icon}`} style={{ fontSize: '1.5rem' }}></i>
+                    <span>{categoryFormData.icon}</span>
+                    <i className={`bi bi-chevron-down ms-auto`} style={{ fontSize: '0.9rem' }}></i>
+                  </button>
+
+                  {showEditIconPicker && (
+                    <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.08)' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
+                        {['bi-tag-fill', 'bi-sofa', 'bi-chair', 'bi-table', 'bi-bed', 'bi-door-closed', 'bi-lamp', 'bi-picture', 'bi-frame', 'bi-box', 'bi-archive', 'bi-grid', 'bi-list', 'bi-cabinet', 'bi-door', 'bi-window', 'bi-briefcase', 'bi-bag', 'bi-basket', 'bi-bookmark'].map(iconName => (
+                          <button
+                            key={iconName}
+                            type="button"
+                            onClick={() => {
+                              setCategoryFormData({ ...categoryFormData, icon: iconName })
+                              setShowEditIconPicker(false)
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: '0.75rem',
+                              borderRadius: '8px',
+                              border: categoryFormData.icon === iconName ? '2px solid var(--fh-primary)' : '1px solid rgba(0,0,0,0.1)',
+                              background: categoryFormData.icon === iconName ? 'rgba(123, 79, 50, 0.1)' : 'white',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              fontSize: '1.5rem',
+                            }}
+                            title={iconName}
+                          >
+                            <i className={`bi ${iconName}`}></i>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -624,6 +660,14 @@ function CategoryModal({ onClose, onSaved }: { onClose: () => void; onSaved: () 
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [icon, setIcon] = useState('bi-tag-fill')
+  const [showIconPicker, setShowIconPicker] = useState(false)
+
+  const furnitureIcons = [
+    'bi-tag-fill', 'bi-sofa', 'bi-chair', 'bi-table', 'bi-bed',
+    'bi-door-closed', 'bi-lamp', 'bi-picture', 'bi-frame', 'bi-box',
+    'bi-archive', 'bi-grid', 'bi-list', 'bi-cabinet', 'bi-door',
+    'bi-window', 'bi-briefcase', 'bi-bag', 'bi-basket', 'bi-bookmark'
+  ]
 
   async function handleSave() {
     if (!name.trim()) { showToast('Name is required', 'error'); return }
@@ -637,7 +681,7 @@ function CategoryModal({ onClose, onSaved }: { onClose: () => void; onSaved: () 
 
   return (
     <div className="lightbox-overlay" onClick={onClose} style={{ background: 'rgba(0,0,0,0.5)' }}>
-      <div className="fh-card p-4" style={{ maxWidth: '400px', width: '90%' }} onClick={e => e.stopPropagation()}>
+      <div className="fh-card p-4" style={{ maxWidth: '500px', width: '90%' }} onClick={e => e.stopPropagation()}>
         <h4 className="mb-3">Add Category</h4>
         <div className="mb-3">
           <label className="fh-form-label">Name</label>
@@ -648,8 +692,49 @@ function CategoryModal({ onClose, onSaved }: { onClose: () => void; onSaved: () 
           <input className="fh-form-control" value={description} onChange={e => setDescription(e.target.value)} placeholder="Optional" />
         </div>
         <div className="mb-3">
-          <label className="fh-form-label">Bootstrap Icon</label>
-          <input className="fh-form-control" value={icon} onChange={e => setIcon(e.target.value)} placeholder="bi-tag-fill" />
+          <label className="fh-form-label">Icon</label>
+          <button
+            type="button"
+            className="fh-form-control d-flex align-items-center gap-2"
+            onClick={() => setShowIconPicker(!showIconPicker)}
+            style={{ background: 'var(--fh-secondary)', border: '1px solid rgba(0,0,0,0.1)', textAlign: 'left', cursor: 'pointer' }}
+          >
+            <i className={`bi ${icon}`} style={{ fontSize: '1.5rem' }}></i>
+            <span>{icon}</span>
+            <i className={`bi bi-chevron-down ms-auto`} style={{ fontSize: '0.9rem' }}></i>
+          </button>
+
+          {showIconPicker && (
+            <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.08)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
+                {furnitureIcons.map(iconName => (
+                  <button
+                    key={iconName}
+                    type="button"
+                    onClick={() => {
+                      setIcon(iconName)
+                      setShowIconPicker(false)
+                    }}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '0.75rem',
+                      borderRadius: '8px',
+                      border: icon === iconName ? '2px solid var(--fh-primary)' : '1px solid rgba(0,0,0,0.1)',
+                      background: icon === iconName ? 'rgba(123, 79, 50, 0.1)' : 'white',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      fontSize: '1.5rem',
+                    }}
+                    title={iconName}
+                  >
+                    <i className={`bi ${iconName}`}></i>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <div className="d-flex gap-2">
           <button className="btn-fh-primary btn flex-grow-1" onClick={handleSave}>Save</button>
