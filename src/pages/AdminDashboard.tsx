@@ -358,8 +358,8 @@ export default function AdminDashboard() {
           {/* Edit Category Modal */}
           {editingCategory && (
             <div className="modal-overlay" onClick={() => setEditingCategory(null)}>
-              <div className="modal-content" onClick={e => e.stopPropagation()}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <div className="modal-content" style={{ maxHeight: '90vh', display: 'flex', flexDirection: 'column' }} onClick={e => e.stopPropagation()}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexShrink: 0 }}>
                   <h3 style={{ color: 'var(--fh-primary)', margin: 0 }}>Edit Category</h3>
                   <button
                     onClick={() => setEditingCategory(null)}
@@ -369,84 +369,86 @@ export default function AdminDashboard() {
                   </button>
                 </div>
 
-                <div className="mb-3">
-                  <label className="fh-form-label">Category Name</label>
-                  <input
-                    type="text"
-                    className="fh-form-control"
-                    value={categoryFormData.name}
-                    onChange={e => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
-                  />
-                </div>
+                <div style={{ overflowY: 'auto', flexGrow: 1, paddingRight: '0.5rem', marginRight: '-0.5rem' }}>
+                  <div className="mb-3">
+                    <label className="fh-form-label">Category Name</label>
+                    <input
+                      type="text"
+                      className="fh-form-control"
+                      value={categoryFormData.name}
+                      onChange={e => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
+                    />
+                  </div>
 
-                <div className="mb-3">
-                  <label className="fh-form-label">Slug</label>
-                  <input
-                    type="text"
-                    className="fh-form-control"
-                    value={categoryFormData.slug}
-                    onChange={e => setCategoryFormData({ ...categoryFormData, slug: e.target.value })}
-                  />
-                </div>
+                  <div className="mb-3">
+                    <label className="fh-form-label">Slug</label>
+                    <input
+                      type="text"
+                      className="fh-form-control"
+                      value={categoryFormData.slug}
+                      onChange={e => setCategoryFormData({ ...categoryFormData, slug: e.target.value })}
+                    />
+                  </div>
 
-                <div className="mb-3">
-                  <label className="fh-form-label">Description</label>
-                  <textarea
-                    className="fh-form-control"
-                    rows={3}
-                    value={categoryFormData.description}
-                    onChange={e => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
-                  />
-                </div>
+                  <div className="mb-3">
+                    <label className="fh-form-label">Description</label>
+                    <textarea
+                      className="fh-form-control"
+                      rows={3}
+                      value={categoryFormData.description}
+                      onChange={e => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
+                    />
+                  </div>
 
-                <div className="mb-3">
-                  <label className="fh-form-label">Icon</label>
-                  <button
-                    type="button"
-                    className="fh-form-control d-flex align-items-center gap-2"
-                    onClick={() => setShowEditIconPicker(!showEditIconPicker)}
-                    style={{ background: 'var(--fh-secondary)', border: '1px solid rgba(0,0,0,0.1)', textAlign: 'left', cursor: 'pointer' }}
-                  >
-                    <i className={`bi ${categoryFormData.icon}`} style={{ fontSize: '1.5rem', color: 'var(--fh-text)' }}></i>
-                    <span>{categoryFormData.icon}</span>
-                    <i className={`bi bi-chevron-down ms-auto`} style={{ fontSize: '0.9rem' }}></i>
-                  </button>
+                  <div className="mb-3">
+                    <label className="fh-form-label">Icon</label>
+                    <button
+                      type="button"
+                      className="fh-form-control d-flex align-items-center gap-2"
+                      onClick={() => setShowEditIconPicker(!showEditIconPicker)}
+                      style={{ background: 'var(--fh-secondary)', border: '1px solid rgba(0,0,0,0.1)', textAlign: 'left', cursor: 'pointer' }}
+                    >
+                      <i className={`bi ${categoryFormData.icon}`} style={{ fontSize: '1.5rem', color: 'var(--fh-text)' }}></i>
+                      <span>{categoryFormData.icon}</span>
+                      <i className={`bi bi-chevron-down ms-auto`} style={{ fontSize: '0.9rem' }}></i>
+                    </button>
 
-                  {showEditIconPicker && (
-                    <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'var(--fh-secondary)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)' }}>
-                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
-                        {furnitureIcons.map(iconName => (
-                          <button
-                            key={iconName}
-                            type="button"
-                            onClick={() => {
-                              setCategoryFormData({ ...categoryFormData, icon: iconName })
-                              setShowEditIconPicker(false)
-                            }}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              padding: '0.75rem',
-                              borderRadius: '8px',
-                              border: categoryFormData.icon === iconName ? '2px solid var(--fh-primary)' : '1px solid rgba(0,0,0,0.15)',
-                              background: categoryFormData.icon === iconName ? 'rgba(123, 79, 50, 0.15)' : 'transparent',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease',
-                              fontSize: '1.5rem',
-                              color: 'var(--fh-text)',
-                            }}
-                            title={iconName}
-                          >
-                            <i className={`bi ${iconName}`}></i>
-                          </button>
-                        ))}
+                    {showEditIconPicker && (
+                      <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'var(--fh-secondary)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
+                          {furnitureIcons.map(iconName => (
+                            <button
+                              key={iconName}
+                              type="button"
+                              onClick={() => {
+                                setCategoryFormData({ ...categoryFormData, icon: iconName })
+                                setShowEditIconPicker(false)
+                              }}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                padding: '0.75rem',
+                                borderRadius: '8px',
+                                border: categoryFormData.icon === iconName ? '2px solid var(--fh-primary)' : '1px solid rgba(0,0,0,0.15)',
+                                background: categoryFormData.icon === iconName ? 'rgba(123, 79, 50, 0.15)' : 'transparent',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                fontSize: '1.5rem',
+                                color: 'var(--fh-text)',
+                              }}
+                              title={iconName}
+                            >
+                              <i className={`bi ${iconName}`}></i>
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexShrink: 0 }}>
                   <button
                     onClick={() => setEditingCategory(null)}
                     className="btn flex-grow-1"

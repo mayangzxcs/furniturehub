@@ -14,7 +14,7 @@ export default function RatingsModal() {
 
   // Check if user has already rated
   useEffect(() => {
-    if (!profile) return
+    if (!profile || profile.role === 'admin') return
 
     async function checkUserRating() {
       if (!profile) return
@@ -27,7 +27,7 @@ export default function RatingsModal() {
       if (data) {
         setHasRated(true)
       } else {
-        // Start modal display timer
+        // Start modal display timer only if user is logged in and not admin
         const timer = setTimeout(() => {
           setShowModal(true)
         }, 60000) // 1 minute
@@ -39,9 +39,9 @@ export default function RatingsModal() {
     checkUserRating()
   }, [profile])
 
-  // Set up recurring modal if user hasn't rated
+  // Set up recurring modal if user hasn't rated and is logged in
   useEffect(() => {
-    if (!profile || hasRated || showModal) return
+    if (!profile || profile.role === 'admin' || hasRated || showModal) return
 
     const interval = setInterval(() => {
       setShowModal(true)
@@ -86,8 +86,8 @@ export default function RatingsModal() {
     setComment('')
   }
 
-  // Hide modal for admins - only show for viewers
-  if (!profile || !showModal || hasRated || profile.role === 'admin') return null
+  // Hide modal for admins, non-authenticated users, and those who already rated
+  if (!profile || profile.role === 'admin' || !showModal || hasRated) return null
 
   return (
     <div className="ratings-modal-overlay" onClick={handleCloseModal}>
