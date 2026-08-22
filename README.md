@@ -1,6 +1,6 @@
-# FurnitureHub
+# Home of Comfort by Mark LTD
 
-A furniture inspiration and community platform built with React, Vite, TypeScript, and Supabase.
+A furniture repair, reupholstery, and restoration platform built with React, Vite, TypeScript, and Supabase.
 
 ## Features
 

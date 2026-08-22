@@ -7,11 +7,10 @@ export default function Footer() {
         <div className="row g-4">
           <div className="col-lg-4">
             <h5 className="fw-bold mb-3" style={{ color: 'var(--fh-primary)' }}>
-              <i className="bi bi-house-door-fill me-2"></i>FurnitureHub
+              <i className="bi bi-house-door-fill me-2"></i>Home of Comfort by Mark LTD
             </h5>
             <p style={{ opacity: 0.7, fontSize: '0.95rem' }}>
-              A premium furniture social platform where design meets community. Discover, share, and
-              connect over beautiful furniture.
+              Expert furniture repair, reupholstery, and restoration services. We breathe new life into your cherished pieces while preserving the memories and history built into them.
             </p>
           </div>
           <div className="col-lg-2 col-6">
@@ -42,7 +41,7 @@ export default function Footer() {
         </div>
         <div className="fh-divider"></div>
         <div className="text-center" style={{ opacity: 0.5, fontSize: '0.9rem' }}>
-          &copy; {new Date().getFullYear()} FurnitureHub. All rights reserved.
+          &copy; {new Date().getFullYear()} Home of Comfort by Mark LTD. All rights reserved.
         </div>
       </div>
     </footer>

@@ -69,7 +69,7 @@ export default function PostCard({ post, onLightbox, onFavoriteChange }: Props) 
     if (!profile) { showToast('Sign in to share posts', 'info'); return }
     const url = `${window.location.origin}/post/${post.id}`
     if (navigator.share) {
-      navigator.share({ title: 'FurnitureHub', text: post.caption, url }).catch(() => {})
+      navigator.share({ title: 'Home of Comfort by Mark LTD', text: post.caption, url }).catch(() => {})
     } else {
       navigator.clipboard.writeText(url)
       showToast('Link copied to clipboard', 'success')

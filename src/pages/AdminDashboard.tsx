@@ -3,16 +3,16 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../lib/auth'
 import { showToast } from '../lib/toast'
-import type { Profile, Category, PostWithRelations, ActivityLog } from '../lib/types'
+import type { Profile, Category, PostWithRelations, ActivityLog, Rating } from '../lib/types'
 
-type Tab = 'overview' | 'posts' | 'users' | 'categories' | 'comments' | 'activity'
+type Tab = 'overview' | 'posts' | 'users' | 'categories' | 'comments' | 'ratings' | 'activity'
 
 export default function AdminDashboard() {
   const { profile } = useAuth()
   const [tab, setTab] = useState<Tab>('overview')
   const [stats, setStats] = useState({
     users: 0, activeUsers: 0, disabledUsers: 0, posts: 0, categories: 0,
-    comments: 0, likes: 0, shares: 0, messages: 0,
+    comments: 0, likes: 0, shares: 0, messages: 0, ratings: 0,
   })
   const [users, setUsers] = useState<Profile[]>([])
   const [posts, setPosts] = useState<PostWithRelations[]>([])
@@ -22,6 +22,7 @@ export default function AdminDashboard() {
   const [showCategoryModal, setShowCategoryModal] = useState(false)
   const [topPosts, setTopPosts] = useState<PostWithRelations[]>([])
   const [userSearch, setUserSearch] = useState('')
+  const [ratings, setRatings] = useState<(Rating & { user?: Profile | null })[]>([])
   const filteredUsers = users.filter(u =>
     u.display_name.toLowerCase().includes(userSearch.toLowerCase()) ||
     u.email.toLowerCase().includes(userSearch.toLowerCase())
@@ -32,11 +33,12 @@ export default function AdminDashboard() {
     loadUsers()
     loadPosts()
     loadCategories()
+    loadRatings()
     loadActivity()
   }, [])
 
   async function loadStats() {
-    const [users, activeUsers, disabledUsers, posts, categories, comments, likes, shares, messages] = await Promise.all([
+    const [users, activeUsers, disabledUsers, posts, categories, comments, likes, shares, messages, ratingsCount] = await Promise.all([
       supabase.from('profiles').select('id', { count: 'exact', head: true }),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('status', 'active'),
       supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('status', 'disabled'),
@@ -46,12 +48,13 @@ export default function AdminDashboard() {
       supabase.from('likes').select('id', { count: 'exact', head: true }),
       supabase.from('shares').select('id', { count: 'exact', head: true }),
       supabase.from('messages').select('id', { count: 'exact', head: true }),
+      supabase.from('ratings').select('id', { count: 'exact', head: true }),
     ])
     setStats({
       users: users.count || 0, activeUsers: activeUsers.count || 0, disabledUsers: disabledUsers.count || 0,
       posts: posts.count || 0, categories: categories.count || 0,
       comments: comments.count || 0, likes: likes.count || 0, shares: shares.count || 0,
-      messages: messages.count || 0,
+      messages: messages.count || 0, ratings: ratingsCount.count || 0,
     })
   }
 
@@ -90,6 +93,14 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false })
       .limit(50)
     setActivityLogs((data as ActivityLog[]) || [])
+  }
+
+  async function loadRatings() {
+    const { data } = await supabase
+      .from('ratings')
+      .select('*, user:profiles(*)')
+      .order('created_at', { ascending: false })
+    setRatings((data as (Rating & { user?: Profile | null })[]) || [])
   }
 
   async function updateUserStatus(userId: string, status: string) {
@@ -142,6 +153,7 @@ export default function AdminDashboard() {
     { label: 'Posts', value: stats.posts, icon: 'bi-images', color: '#C26A4B' },
     { label: 'Categories', value: stats.categories, icon: 'bi-tags-fill', color: '#5D7A58' },
     { label: 'Comments', value: stats.comments, icon: 'bi-chat-dots-fill', color: '#7B4F32' },
+    { label: 'Ratings', value: stats.ratings, icon: 'bi-star-fill', color: '#FFD700' },
     { label: 'Likes', value: stats.likes, icon: 'bi-heart-fill', color: '#D9534F' },
     { label: 'Shares', value: stats.shares, icon: 'bi-share-fill', color: '#5bc0de' },
     { label: 'Messages', value: stats.messages, icon: 'bi-envelope-fill', color: '#C26A4B' },
@@ -157,7 +169,7 @@ export default function AdminDashboard() {
       {/* Tabs */}
       <div className="mb-4">
         <div className="d-flex gap-2 flex-wrap">
-          {(['overview', 'posts', 'users', 'categories', 'comments', 'activity'] as Tab[]).map(t => (
+          {(['overview', 'posts', 'users', 'categories', 'comments', 'ratings', 'activity'] as Tab[]).map(t => (
             <button key={t} className={`btn btn-sm ${tab === t ? 'btn-fh-primary' : 'btn-outline-secondary'}`} onClick={() => setTab(t)}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -293,6 +305,59 @@ export default function AdminDashboard() {
       )}
 
       {tab === 'comments' && <CommentsTab onLog={logActivity} />}
+
+      {tab === 'ratings' && (
+        <div className="fh-card p-3">
+          {ratings.length === 0 ? (
+            <p className="text-muted text-center py-4">No ratings yet.</p>
+          ) : (
+            <div className="table-responsive">
+              <table className="table table-hover mb-0">
+                <thead>
+                  <tr style={{ background: 'rgba(0,0,0,0.02)' }}>
+                    <th>User</th>
+                    <th>Rating</th>
+                    <th>Comment</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ratings.map(r => (
+                    <tr key={r.id}>
+                      <td><strong>{r.user?.display_name || 'Unknown'}</strong></td>
+                      <td>
+                        <div style={{ color: '#FFD700' }}>
+                          {[...Array(r.rating)].map((_, i) => <i key={i} className="bi bi-star-fill"></i>)}
+                          {[...Array(5 - r.rating)].map((_, i) => <i key={i} className="bi bi-star" style={{ opacity: 0.3 }}></i>)}
+                        </div>
+                      </td>
+                      <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {r.comment || <span style={{ opacity: 0.5 }}>No comment</span>}
+                      </td>
+                      <td style={{ opacity: 0.6, fontSize: '0.9rem' }}>{new Date(r.created_at).toLocaleDateString()}</td>
+                      <td>
+                        <button
+                          className="btn btn-sm btn-outline-danger"
+                          onClick={async () => {
+                            if (window.confirm('Delete this rating?')) {
+                              await supabase.from('ratings').delete().eq('id', r.id)
+                              loadRatings()
+                              showToast('Rating deleted', 'success')
+                            }
+                          }}
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
       {tab === 'activity' && (
         <div className="fh-card p-3">
           {activityLogs.length === 0 ? <p className="text-muted text-center py-4">No activity logged.</p> : activityLogs.map(log => (
