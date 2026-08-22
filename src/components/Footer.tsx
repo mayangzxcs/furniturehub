@@ -31,13 +31,6 @@ export default function Footer() {
             <Link to="/privacy" className="fh-footer-link">Privacy Policy</Link>
             <Link to="/terms" className="fh-footer-link">Terms of Service</Link>
           </div>
-          <div className="col-lg-2 col-6">
-            <h6 className="fw-bold mb-3">Follow Us</h6>
-            <a href="#" className="fh-footer-link"><i className="bi bi-facebook me-1"></i> Facebook</a>
-            <a href="#" className="fh-footer-link"><i className="bi bi-instagram me-1"></i> Instagram</a>
-            <a href="#" className="fh-footer-link"><i className="bi bi-twitter-x me-1"></i> X</a>
-            <a href="#" className="fh-footer-link"><i className="bi bi-pinterest me-1"></i> Pinterest</a>
-          </div>
         </div>
         <div className="fh-divider"></div>
         <div className="text-center" style={{ opacity: 0.5, fontSize: '0.9rem' }}>
