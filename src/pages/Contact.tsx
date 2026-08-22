@@ -52,47 +52,6 @@ export default function Contact() {
             </div>
           </div>
         </div>
-
-        {/* Contact Form */}
-        <div className="col-md-6">
-          <div className="fh-card p-4">
-            <h3 style={{ color: 'var(--fh-primary)', marginBottom: '1.5rem' }}>Send us a Message</h3>
-            <p style={{ opacity: 0.7, marginBottom: '1.5rem' }}>Have a question or feedback? We'd love to hear from you.</p>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-3">
-                <label className="fh-form-label">Name</label>
-                <input 
-                  type="text" 
-                  className="fh-form-control" 
-                  value={form.name} 
-                  onChange={e => setForm({...form, name: e.target.value})} 
-                  required 
-                />
-              </div>
-              <div className="mb-3">
-                <label className="fh-form-label">Email</label>
-                <input 
-                  type="email" 
-                  className="fh-form-control" 
-                  value={form.email} 
-                  onChange={e => setForm({...form, email: e.target.value})} 
-                  required 
-                />
-              </div>
-              <div className="mb-3">
-                <label className="fh-form-label">Message</label>
-                <textarea 
-                  className="fh-form-control" 
-                  rows={4} 
-                  value={form.message} 
-                  onChange={e => setForm({...form, message: e.target.value})} 
-                  required 
-                />
-              </div>
-              <button type="submit" className="btn-fh-primary btn w-100">Send Message</button>
-            </form>
-          </div>
-        </div>
       </div>
     </div>
   )
