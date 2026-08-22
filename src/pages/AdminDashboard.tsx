@@ -26,6 +26,14 @@ export default function AdminDashboard() {
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
   const [categoryFormData, setCategoryFormData] = useState({ name: '', slug: '', description: '', icon: '' })
   const [showEditIconPicker, setShowEditIconPicker] = useState(false)
+
+  const furnitureIcons = [
+    'bi-tag-fill', 'bi-door-closed', 'bi-lamp', 'bi-picture', 'bi-frame',
+    'bi-box', 'bi-archive', 'bi-list', 'bi-door', 'bi-window',
+    'bi-briefcase', 'bi-bag', 'bi-basket', 'bi-bookmark', 'bi-bed',
+    'bi-inbox', 'bi-layers', 'bi-collection', 'bi-palette', 'bi-shop'
+  ]
+
   const filteredUsers = users.filter(u =>
     u.display_name.toLowerCase().includes(userSearch.toLowerCase()) ||
     u.email.toLowerCase().includes(userSearch.toLowerCase())
@@ -399,15 +407,15 @@ export default function AdminDashboard() {
                     onClick={() => setShowEditIconPicker(!showEditIconPicker)}
                     style={{ background: 'var(--fh-secondary)', border: '1px solid rgba(0,0,0,0.1)', textAlign: 'left', cursor: 'pointer' }}
                   >
-                    <i className={`bi ${categoryFormData.icon}`} style={{ fontSize: '1.5rem' }}></i>
+                    <i className={`bi ${categoryFormData.icon}`} style={{ fontSize: '1.5rem', color: 'var(--fh-text)' }}></i>
                     <span>{categoryFormData.icon}</span>
                     <i className={`bi bi-chevron-down ms-auto`} style={{ fontSize: '0.9rem' }}></i>
                   </button>
 
                   {showEditIconPicker && (
-                    <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.08)' }}>
+                    <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'var(--fh-secondary)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
-                        {['bi-tag-fill', 'bi-sofa', 'bi-chair', 'bi-table', 'bi-bed', 'bi-door-closed', 'bi-lamp', 'bi-picture', 'bi-frame', 'bi-box', 'bi-archive', 'bi-grid', 'bi-list', 'bi-cabinet', 'bi-door', 'bi-window', 'bi-briefcase', 'bi-bag', 'bi-basket', 'bi-bookmark'].map(iconName => (
+                        {furnitureIcons.map(iconName => (
                           <button
                             key={iconName}
                             type="button"
@@ -421,11 +429,12 @@ export default function AdminDashboard() {
                               justifyContent: 'center',
                               padding: '0.75rem',
                               borderRadius: '8px',
-                              border: categoryFormData.icon === iconName ? '2px solid var(--fh-primary)' : '1px solid rgba(0,0,0,0.1)',
-                              background: categoryFormData.icon === iconName ? 'rgba(123, 79, 50, 0.1)' : 'white',
+                              border: categoryFormData.icon === iconName ? '2px solid var(--fh-primary)' : '1px solid rgba(0,0,0,0.15)',
+                              background: categoryFormData.icon === iconName ? 'rgba(123, 79, 50, 0.15)' : 'transparent',
                               cursor: 'pointer',
                               transition: 'all 0.2s ease',
                               fontSize: '1.5rem',
+                              color: 'var(--fh-text)',
                             }}
                             title={iconName}
                           >
@@ -663,10 +672,10 @@ function CategoryModal({ onClose, onSaved }: { onClose: () => void; onSaved: () 
   const [showIconPicker, setShowIconPicker] = useState(false)
 
   const furnitureIcons = [
-    'bi-tag-fill', 'bi-sofa', 'bi-chair', 'bi-table', 'bi-bed',
-    'bi-door-closed', 'bi-lamp', 'bi-picture', 'bi-frame', 'bi-box',
-    'bi-archive', 'bi-grid', 'bi-list', 'bi-cabinet', 'bi-door',
-    'bi-window', 'bi-briefcase', 'bi-bag', 'bi-basket', 'bi-bookmark'
+    'bi-tag-fill', 'bi-door-closed', 'bi-lamp', 'bi-picture', 'bi-frame',
+    'bi-box', 'bi-archive', 'bi-list', 'bi-door', 'bi-window',
+    'bi-briefcase', 'bi-bag', 'bi-basket', 'bi-bookmark', 'bi-bed',
+    'bi-inbox', 'bi-layers', 'bi-collection', 'bi-palette', 'bi-shop'
   ]
 
   async function handleSave() {
@@ -699,13 +708,13 @@ function CategoryModal({ onClose, onSaved }: { onClose: () => void; onSaved: () 
             onClick={() => setShowIconPicker(!showIconPicker)}
             style={{ background: 'var(--fh-secondary)', border: '1px solid rgba(0,0,0,0.1)', textAlign: 'left', cursor: 'pointer' }}
           >
-            <i className={`bi ${icon}`} style={{ fontSize: '1.5rem' }}></i>
+            <i className={`bi ${icon}`} style={{ fontSize: '1.5rem', color: 'var(--fh-text)' }}></i>
             <span>{icon}</span>
             <i className={`bi bi-chevron-down ms-auto`} style={{ fontSize: '0.9rem' }}></i>
           </button>
 
           {showIconPicker && (
-            <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'rgba(0,0,0,0.02)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.08)' }}>
+            <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'var(--fh-secondary)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.15)' }}>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.75rem' }}>
                 {furnitureIcons.map(iconName => (
                   <button
@@ -721,11 +730,12 @@ function CategoryModal({ onClose, onSaved }: { onClose: () => void; onSaved: () 
                       justifyContent: 'center',
                       padding: '0.75rem',
                       borderRadius: '8px',
-                      border: icon === iconName ? '2px solid var(--fh-primary)' : '1px solid rgba(0,0,0,0.1)',
-                      background: icon === iconName ? 'rgba(123, 79, 50, 0.1)' : 'white',
+                      border: icon === iconName ? '2px solid var(--fh-primary)' : '1px solid rgba(0,0,0,0.15)',
+                      background: icon === iconName ? 'rgba(123, 79, 50, 0.15)' : 'transparent',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                       fontSize: '1.5rem',
+                      color: 'var(--fh-text)',
                     }}
                     title={iconName}
                   >
