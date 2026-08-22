@@ -23,6 +23,8 @@ export default function AdminDashboard() {
   const [topPosts, setTopPosts] = useState<PostWithRelations[]>([])
   const [userSearch, setUserSearch] = useState('')
   const [ratings, setRatings] = useState<(Rating & { user?: Profile | null })[]>([])
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  const [categoryFormData, setCategoryFormData] = useState({ name: '', slug: '', description: '', icon: '' })
   const filteredUsers = users.filter(u =>
     u.display_name.toLowerCase().includes(userSearch.toLowerCase()) ||
     u.email.toLowerCase().includes(userSearch.toLowerCase())
@@ -151,6 +153,36 @@ export default function AdminDashboard() {
     if (error) { showToast('Failed to delete', 'error'); return }
     showToast('Category deleted', 'success')
     loadCategories()
+  }
+
+  function openEditCategory(cat: Category) {
+    setEditingCategory(cat)
+    setCategoryFormData({ name: cat.name, slug: cat.slug, description: cat.description, icon: cat.icon })
+  }
+
+  async function handleSaveCategory() {
+    if (!editingCategory || !categoryFormData.name.trim()) {
+      showToast('Please fill in all fields', 'info')
+      return
+    }
+
+    const { error } = await supabase
+      .from('categories')
+      .update({
+        name: categoryFormData.name,
+        slug: categoryFormData.slug || categoryFormData.name.toLowerCase().replace(/\s+/g, '-'),
+        description: categoryFormData.description,
+        icon: categoryFormData.icon,
+      })
+      .eq('id', editingCategory.id)
+
+    if (error) {
+      showToast('Failed to update category', 'error')
+    } else {
+      showToast('Category updated successfully', 'success')
+      setEditingCategory(null)
+      loadCategories()
+    }
   }
 
   async function logActivity(action: string, description: string, metadata: Record<string, unknown> = {}) {
@@ -308,10 +340,85 @@ export default function AdminDashboard() {
               <div key={c.id} className="d-flex align-items-center gap-3 p-2 mb-2 rounded" style={{ background: 'rgba(0,0,0,0.02)' }}>
                 <i className={`bi ${c.icon || 'bi-tag-fill'}`} style={{ fontSize: '1.5rem', color: 'var(--fh-accent)' }}></i>
                 <div className="flex-grow-1"><div className="fw-semibold">{c.name}</div><div style={{ fontSize: '0.8rem', opacity: 0.5 }}>{c.description}</div></div>
+                <button className="btn btn-sm btn-outline-primary" onClick={() => openEditCategory(c)}><i className="bi bi-pencil-fill"></i> Edit</button>
                 <button className="btn btn-sm btn-outline-danger" onClick={() => deleteCategory(c.id)}><i className="bi bi-trash"></i></button>
               </div>
             ))}
           </div>
+
+          {/* Edit Category Modal */}
+          {editingCategory && (
+            <div className="modal-overlay" onClick={() => setEditingCategory(null)}>
+              <div className="modal-content" onClick={e => e.stopPropagation()}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h3 style={{ color: 'var(--fh-primary)', margin: 0 }}>Edit Category</h3>
+                  <button
+                    onClick={() => setEditingCategory(null)}
+                    style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer' }}
+                  >
+                    <i className="bi bi-x-lg"></i>
+                  </button>
+                </div>
+
+                <div className="mb-3">
+                  <label className="fh-form-label">Category Name</label>
+                  <input
+                    type="text"
+                    className="fh-form-control"
+                    value={categoryFormData.name}
+                    onChange={e => setCategoryFormData({ ...categoryFormData, name: e.target.value })}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="fh-form-label">Slug</label>
+                  <input
+                    type="text"
+                    className="fh-form-control"
+                    value={categoryFormData.slug}
+                    onChange={e => setCategoryFormData({ ...categoryFormData, slug: e.target.value })}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="fh-form-label">Description</label>
+                  <textarea
+                    className="fh-form-control"
+                    rows={3}
+                    value={categoryFormData.description}
+                    onChange={e => setCategoryFormData({ ...categoryFormData, description: e.target.value })}
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label className="fh-form-label">Icon (Bootstrap Icon Class)</label>
+                  <input
+                    type="text"
+                    className="fh-form-control"
+                    placeholder="e.g., bi-sofa"
+                    value={categoryFormData.icon}
+                    onChange={e => setCategoryFormData({ ...categoryFormData, icon: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button
+                    onClick={() => setEditingCategory(null)}
+                    className="btn flex-grow-1"
+                    style={{ background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: 'var(--fh-btn-radius)', color: 'var(--fh-text)' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSaveCategory}
+                    className="btn-fh-primary btn flex-grow-1"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 

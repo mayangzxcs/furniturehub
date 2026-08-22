@@ -86,7 +86,8 @@ export default function RatingsModal() {
     setComment('')
   }
 
-  if (!profile || !showModal || hasRated) return null
+  // Hide modal for admins - only show for viewers
+  if (!profile || !showModal || hasRated || profile.role === 'admin') return null
 
   return (
     <div className="ratings-modal-overlay" onClick={handleCloseModal}>
