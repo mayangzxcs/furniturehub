@@ -28,10 +28,10 @@ export default function AdminDashboard() {
   const [showEditIconPicker, setShowEditIconPicker] = useState(false)
 
   const furnitureIcons = [
-    'bi-tag-fill', 'bi-door-closed', 'bi-lamp', 'bi-picture', 'bi-frame',
-    'bi-box', 'bi-archive', 'bi-list', 'bi-door', 'bi-window',
-    'bi-briefcase', 'bi-bag', 'bi-basket', 'bi-bookmark', 'bi-bed',
-    'bi-inbox', 'bi-layers', 'bi-collection', 'bi-palette', 'bi-shop'
+    'bi-tag-fill', 'bi-door-closed', 'bi-lamp', 'bi-image', 'bi-box',
+    'bi-archive', 'bi-list', 'bi-border-all', 'bi-window', 'bi-briefcase',
+    'bi-bag', 'bi-basket', 'bi-bookmark', 'bi-bag-dash', 'bi-inbox',
+    'bi-layers', 'bi-palette', 'bi-cup', 'bi-shop', 'bi-card-image'
   ]
 
   const filteredUsers = users.filter(u =>
@@ -672,10 +672,10 @@ function CategoryModal({ onClose, onSaved }: { onClose: () => void; onSaved: () 
   const [showIconPicker, setShowIconPicker] = useState(false)
 
   const furnitureIcons = [
-    'bi-tag-fill', 'bi-door-closed', 'bi-lamp', 'bi-picture', 'bi-frame',
-    'bi-box', 'bi-archive', 'bi-list', 'bi-door', 'bi-window',
-    'bi-briefcase', 'bi-bag', 'bi-basket', 'bi-bookmark', 'bi-bed',
-    'bi-inbox', 'bi-layers', 'bi-collection', 'bi-palette', 'bi-shop'
+    'bi-tag-fill', 'bi-door-closed', 'bi-lamp', 'bi-image', 'bi-box',
+    'bi-archive', 'bi-list', 'bi-border-all', 'bi-window', 'bi-briefcase',
+    'bi-bag', 'bi-basket', 'bi-bookmark', 'bi-bag-dash', 'bi-inbox',
+    'bi-layers', 'bi-palette', 'bi-cup', 'bi-shop', 'bi-card-image'
   ]
 
   async function handleSave() {
