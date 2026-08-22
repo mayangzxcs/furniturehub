@@ -193,7 +193,7 @@ export default function PostDetail() {
       whatsapp: `https://wa.me/?text=${text}%20${encodeURIComponent(url)}`,
       x: `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`,
       pinterest: `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(url)}&description=${text}`,
-      email: `mailto:?subject=FurnitureHub&body=${text}%20${encodeURIComponent(url)}`,
+      email: `mailto:?subject=Home of Comfort by Mark LTD&body=${text}%20${encodeURIComponent(url)}`,
     }
     if (platform === 'copy') {
       navigator.clipboard.writeText(url)

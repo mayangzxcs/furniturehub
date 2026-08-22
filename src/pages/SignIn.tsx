@@ -28,7 +28,7 @@ export default function SignIn() {
     <div className="auth-container">
       <div className="auth-card fh-card">
         <h1 className="auth-title">Welcome Back</h1>
-        <p className="auth-subtitle">Sign in to your FurnitureHub account</p>
+        <p className="auth-subtitle">Sign in to your Home of Comfort by Mark LTD account</p>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label className="fh-form-label">Email</label>

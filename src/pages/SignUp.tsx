@@ -79,7 +79,7 @@ export default function SignUp() {
   return (
     <div className="auth-container">
       <div className="auth-card fh-card">
-        <h1 className="auth-title">Join FurnitureHub</h1>
+        <h1 className="auth-title">Join Home of Comfort by Mark LTD</h1>
         <p className="auth-subtitle">Create your account to start exploring</p>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
