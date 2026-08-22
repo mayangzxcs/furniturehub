@@ -21,9 +21,9 @@ export default function Contact() {
     <div className="fh-page-container" style={{ maxWidth: '900px' }}>
       <h1 className="fh-section-title">Contact Us</h1>
       
-      <div className="row g-4 mb-4">
+      {/* <div className="row g-4 mb-4"> */}
         {/* Contact Information */}
-        <div className="col-md-6">
+        {/* <div className="col-md-6"> */}
           <div className="fh-card p-4">
             <h3 style={{ color: 'var(--fh-primary)', marginBottom: '1.5rem' }}>Our Contact Information</h3>
             
@@ -50,8 +50,8 @@ export default function Contact() {
               <h5 style={{ fontSize: '0.95rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Address</h5>
               <p style={{ fontSize: '1rem', color: 'var(--fh-text)', lineHeight: '1.6' }}>{contact.address}</p>
             </div>
-          </div>
-        </div>
+          {/* </div> */}
+        {/* </div> */}
       </div>
     </div>
   )
